@@ -9,6 +9,7 @@ export function s3(x) {
 /** Kích thước khung xuất theo kiểu khung của style. */
 export function kichThuocKhung(khung) {
   if (khung === 'doc-crop' || khung === 'doc-blur') return { rong: 1080, cao: 1920 };
+  if (khung === 'vuong') return { rong: 1080, cao: 1080 };
   return { rong: 1920, cao: 1080 };
 }
 
@@ -67,6 +68,9 @@ export function tinhDoanGiu(imLang, tongThoiLuong, { dem = 0.2, imToiThieu = 0.4
 function chuoiKhung(khung) {
   if (khung === 'doc-crop') {
     return 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1';
+  }
+  if (khung === 'vuong') {
+    return 'scale=1080:1080:force_original_aspect_ratio=increase,crop=1080:1080,setsar=1';
   }
   return 'scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2,setsar=1';
 }
@@ -221,30 +225,58 @@ const DINH_DANG_SU_KIEN = `
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `;
 
+/** Tách các từ khoá thành tập từ đơn (thường, bỏ dấu câu) để tô nổi trong phụ đề. */
+export function tapTuNoiBat(tuKhoa) {
+  const tap = new Set();
+  for (const tk of tuKhoa || []) {
+    for (const tu of String(tk.chu || tk).toLowerCase().split(/\s+/)) {
+      const sach = tu.replace(/[.,!?;:"'()]/g, '');
+      if (sach.length >= 2) tap.add(sach);
+    }
+  }
+  return tap;
+}
+
 /**
  * Tạo tệp ASS phụ đề từ transcript.
  * transcript = { doan: [{batDau, ketThuc, chu, tu?: [{batDau, ketThuc, chu}]}] }
- * cheDo 'tu'  → kiểu Hormozi: nhóm ≤4 từ, karaoke \\k đổi màu từng từ, giữa màn hình, IN HOA.
- * cheDo 'dong'→ phụ đề dòng dưới màn hình.
+ * cheDo 'tu'  → karaoke từng-từ (Hormozi); 'dong' → phụ đề dòng.
+ * chuKieu (từ style preset): { font, co, mauDaDoc, mauChoDoc, mauNoiBat, viTri, nhomTu }
+ * tuKhoaNoiBat: các từ được tô màu nổi ngay trong dòng phụ đề.
+ * nenSang: video nền sáng → chế độ dòng chuyển chữ tối viền trắng cho khỏi chìm.
  */
-export function taoAssPhuDe(transcript, { rong, cao, cheDo = 'dong' } = {}) {
+export function taoAssPhuDe(transcript, {
+  rong, cao, cheDo = 'dong', chuKieu = {}, tuKhoaNoiBat = null, nenSang = false,
+} = {}) {
   const doc = cao > rong;
   const suKien = [];
+  const font = chuKieu.font || 'Arial';
+  const tapNoiBat = tuKhoaNoiBat instanceof Set ? tuKhoaNoiBat : tapTuNoiBat(tuKhoaNoiBat);
+  const laNoiBat = (chu) => tapNoiBat.has(String(chu).toLowerCase().replace(/[.,!?;:"'()]/g, ''));
+  const mauNoiBat = chuKieu.mauNoiBat || '&H000A7CFF';
 
   if (cheDo === 'tu') {
-    const co = doc ? 92 : 68;
-    const style = `Style: PhuDe,Arial,${co},&H0000E9FF,&H00FFFFFF,&H00101010,&H96000000,-1,0,0,0,100,100,0,0,1,5,2,5,60,60,0,1\n`;
+    const co = chuKieu.co || (doc ? 92 : 68);
+    const nhomTu = chuKieu.nhomTu || 4;
+    const mauDaDoc = chuKieu.mauDaDoc || '&H0000E9FF';
+    const mauChoDoc = chuKieu.mauChoDoc || '&H00FFFFFF';
+    const canGiua = (chuKieu.viTri || 'giua') === 'giua';
+    const style = `Style: PhuDe,${font},${co},${mauDaDoc},${mauChoDoc},&H00101010,&H96000000,-1,0,0,0,100,100,0,0,1,5,2,${canGiua ? 5 : 2},60,60,${canGiua ? 0 : (doc ? 260 : 80)},1\n`;
     for (const d of transcript.doan) {
       const tu = d.tu && d.tu.length ? d.tu : null;
       if (tu) {
-        for (let i = 0; i < tu.length; i += 4) {
-          const nhom = tu.slice(i, i + 4);
-          const batDau = nhom[0].batDau;
-          const ketThuc = nhom[nhom.length - 1].ketThuc;
+        for (let i = 0; i < tu.length; i += nhomTu) {
+          const nhom = tu.slice(i, i + nhomTu);
           const chu = nhom
-            .map((t) => `{\\k${Math.max(1, Math.round((t.ketThuc - t.batDau) * 100))}}${escapeAss(t.chu.toUpperCase())}`)
+            .map((t) => {
+              const k = `{\\k${Math.max(1, Math.round((t.ketThuc - t.batDau) * 100))}}`;
+              const noiDung = escapeAss(t.chu.toUpperCase());
+              return laNoiBat(t.chu)
+                ? `${k}{\\1c${mauNoiBat}&}${noiDung}{\\1c${mauDaDoc}&}`
+                : `${k}${noiDung}`;
+            })
             .join(' ');
-          suKien.push(`Dialogue: 0,${giaySangAss(batDau)},${giaySangAss(ketThuc)},PhuDe,,0,0,0,,${chu}`);
+          suKien.push(`Dialogue: 0,${giaySangAss(nhom[0].batDau)},${giaySangAss(nhom[nhom.length - 1].ketThuc)},PhuDe,,0,0,0,,${chu}`);
         }
       } else {
         suKien.push(`Dialogue: 0,${giaySangAss(d.batDau)},${giaySangAss(d.ketThuc)},PhuDe,,0,0,0,,${escapeAss(beDong(d.chu.toUpperCase(), 20))}`);
@@ -253,11 +285,19 @@ export function taoAssPhuDe(transcript, { rong, cao, cheDo = 'dong' } = {}) {
     return DAU_ASS(rong, cao) + style + DINH_DANG_SU_KIEN + suKien.join('\n') + '\n';
   }
 
-  const co = doc ? 60 : 48;
-  const marginV = doc ? 260 : 80;
-  const style = `Style: PhuDe,Arial,${co},&H00FFFFFF,&H00FFFFFF,&H00151515,&H7D000000,-1,0,0,0,100,100,0,0,1,3,1,2,60,60,${marginV},1\n`;
+  const co = chuKieu.co || (doc ? 60 : 48);
+  const marginV = (chuKieu.viTri === 'giua') ? 0 : (doc ? 260 : 80);
+  const canh = (chuKieu.viTri === 'giua') ? 5 : 2;
+  const mauChinh = nenSang ? '&H00151515' : (chuKieu.mauDaDoc || '&H00FFFFFF');
+  const mauVien = nenSang ? '&H00FFFFFF' : '&H00151515';
+  const style = `Style: PhuDe,${font},${co},${mauChinh},${mauChinh},${mauVien},&H7D000000,-1,0,0,0,100,100,0,0,1,3,1,${canh},60,60,${marginV},1\n`;
   for (const d of transcript.doan) {
-    suKien.push(`Dialogue: 0,${giaySangAss(d.batDau)},${giaySangAss(d.ketThuc)},PhuDe,,0,0,0,,${escapeAss(beDong(d.chu, doc ? 24 : 42))}`);
+    let noiDung = escapeAss(beDong(d.chu, doc ? 24 : 42));
+    if (tapNoiBat.size) {
+      noiDung = noiDung.split(' ').map((tu) =>
+        laNoiBat(tu) ? `{\\c${mauNoiBat}&\\b1}${tu}{\\c${mauChinh}&\\b0}` : tu).join(' ');
+    }
+    suKien.push(`Dialogue: 0,${giaySangAss(d.batDau)},${giaySangAss(d.ketThuc)},PhuDe,,0,0,0,,${noiDung}`);
   }
   return DAU_ASS(rong, cao) + style + DINH_DANG_SU_KIEN + suKien.join('\n') + '\n';
 }
@@ -280,13 +320,14 @@ export function beDong(chu, gioiHan) {
  * Tạo tệp ASS "đồ hoạ chữ": tiêu đề mở đầu, từ khoá bật giữa màn hình,
  * thẻ chương, watermark tên kênh.
  */
-export function taoAssDoHoa({ rong, cao, thoiLuong, tieuDe = '', tenKenh = '', tuKhoa = [], chuong = [] }) {
+export function taoAssDoHoa({ rong, cao, thoiLuong, tieuDe = '', tenKenh = '', tuKhoa = [], chuong = [], suKienThem = [], mauAccent = '&H00EB6325' }) {
   const doc = cao > rong;
   const styles = [
     `Style: TieuDe,Arial,${doc ? 72 : 60},&H00FFFFFF,&H00FFFFFF,&H00202020,&H8C000000,-1,0,0,0,100,100,0,0,1,4,2,8,60,60,${doc ? 180 : 70},1`,
-    `Style: TuKhoa,Arial,${doc ? 110 : 92},&H00FFFFFF,&H00FFFFFF,&H00EB6325,&H96000000,-1,0,0,0,100,100,2,0,1,6,3,5,40,40,0,1`,
-    `Style: Chuong,Arial,${doc ? 78 : 66},&H00FFFFFF,&H00FFFFFF,&H00EB6325,&H00EB6325,-1,0,0,0,100,100,1,0,3,14,0,5,60,60,0,1`,
+    `Style: TuKhoa,Arial,${doc ? 110 : 92},&H00FFFFFF,&H00FFFFFF,${mauAccent},&H96000000,-1,0,0,0,100,100,2,0,1,6,3,8,40,40,${Math.round(cao * 0.24)},1`,
+    `Style: Chuong,Arial,${doc ? 78 : 66},&H00FFFFFF,&H00FFFFFF,${mauAccent},${mauAccent},-1,0,0,0,100,100,1,0,3,14,0,5,60,60,0,1`,
     `Style: Kenh,Arial,${doc ? 40 : 34},&H5AFFFFFF,&H5AFFFFFF,&H5A101010,&H96000000,0,0,0,0,100,100,0,0,1,2,0,3,40,40,${doc ? 60 : 40},1`,
+    `Style: Bar,Arial,20,${mauAccent},${mauAccent},${mauAccent},${mauAccent},0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1`,
   ].join('\n') + '\n';
 
   const suKien = [];
@@ -304,6 +345,7 @@ export function taoAssDoHoa({ rong, cao, thoiLuong, tieuDe = '', tenKenh = '', t
     const batDau = Math.max(0, Math.min(ch.giay, thoiLuong - 1));
     suKien.push(`Dialogue: 2,${giaySangAss(batDau)},${giaySangAss(Math.min(batDau + 2.2, thoiLuong))},Chuong,,0,0,0,,{\\fad(150,150)}${escapeAss(ch.ten)}`);
   }
+  suKien.push(...suKienThem);
 
   return DAU_ASS(rong, cao) + styles + DINH_DANG_SU_KIEN + suKien.join('\n') + '\n';
 }

@@ -21,10 +21,12 @@ const timStyle = (id) => STYLES.find((s) => s.id === id);
 // ── Danh sách bước hiển thị cho UI ─────────────────────────────────────
 const CAC_BUOC = [
   { id: 'thongtin', ten: 'Đọc thông tin video' },
-  { id: 'catlang', ten: 'Cắt khoảng lặng + đổi khung + chuẩn âm lượng' },
+  { id: 'catlang', ten: 'Cắt khoảng lặng' },
   { id: 'transcript', ten: 'Bóc transcript (whisper)' },
-  { id: 'daodien', ten: 'Đạo diễn AI chọn nhịp edit (claude)' },
-  { id: 'render', ten: 'Render hiệu ứng + chữ' },
+  { id: 'daodien', ten: 'Đạo diễn AI xem hình + chia cảnh (claude)' },
+  { id: 'render', ten: 'Render camera ảo + chữ + SFX' },
+  { id: 'tusoat', ten: 'Đạo diễn tự soát bản dựng' },
+  { id: 'khungthem', ten: 'Xuất thêm khung hình' },
   { id: 'xuatban', ten: 'Xuất gói SEO + phụ đề' },
 ];
 
@@ -89,16 +91,33 @@ app.post('/api/viec', upload.single('video'), (req, res) => {
   if (!req.file) return res.status(400).json({ loi: 'Thiếu tệp video.' });
   if (!style) return res.status(400).json({ loi: 'Style không tồn tại.' });
 
+  // tinh chỉnh style ngay trên UI: ghi đè vài trường của preset
+  let styleDung = style;
+  try {
+    const tc = JSON.parse(req.body.tinhChinh || '{}');
+    styleDung = { ...style };
+    if (['thua', 'vua', 'day'].includes(tc.matDo)) styleDung.zoom = { ...style.zoom, batTat: true, matDo: tc.matDo };
+    if (tc.matDo === 'tat') styleDung.zoom = { batTat: false };
+    if (['tu', 'dong', 'khong'].includes(tc.phuDe)) styleDung.phuDe = tc.phuDe;
+    if (typeof tc.sfx === 'boolean') styleDung.sfx = tc.sfx;
+    if (typeof tc.tuKhoa === 'boolean') styleDung.tuKhoa = tc.tuKhoa;
+  } catch { /* tinh chỉnh hỏng → dùng preset gốc */ }
+
+  const xuatThem = String(req.body.xuatThem || '')
+    .split(',').map((s) => s.trim())
+    .filter((s) => ['ngang', 'doc-crop', 'vuong'].includes(s)).slice(0, 3);
+
   const viec = {
     id: req.idViec,
     thuMuc: path.dirname(req.file.path),
     tepGoc: path.basename(req.file.path),
     tenTepGoc: req.file.originalname,
-    style,
+    style: styleDung,
     tuyChon: {
       tieuDe: (req.body.tieuDe || '').trim().slice(0, 120),
       tenKenh: (req.body.tenKenh || '').trim().slice(0, 60),
       mucCat: ['tat', 'nhe', 'vua', 'manh'].includes(req.body.mucCat) ? req.body.mucCat : 'vua',
+      xuatThem,
     },
     trangThai: 'cho',
     buoc: CAC_BUOC.map((b) => ({ ...b, trangThai: 'cho', chiTiet: '' })),
@@ -121,8 +140,25 @@ app.get('/api/viec/:id', (req, res) => {
   });
 });
 
+// Lịch sử: các việc đã dựng xong (đọc từ đĩa nên sống sót qua restart)
+app.get('/api/lich-su', (req, res) => {
+  const danhSach = [];
+  for (const id of readdirSync(THU_MUC_DU_LIEU)) {
+    const tepBc = path.join(THU_MUC_DU_LIEU, id, 'bao-cao.json');
+    if (!existsSync(tepBc) || !existsSync(path.join(THU_MUC_DU_LIEU, id, 'ra.mp4'))) continue;
+    try {
+      const bc = JSON.parse(readFileSync(tepBc, 'utf8'));
+      danhSach.push({ id, style: bc.style, tieuDe: bc.tieuDe || '', luc: bc.luc || '', thoiLuong: bc.thoiLuongSauCat, khungThem: bc.khungThem || [] });
+    } catch { /* báo cáo hỏng → bỏ qua */ }
+  }
+  danhSach.sort((a, b) => (b.luc || '').localeCompare(a.luc || ''));
+  res.json(danhSach.slice(0, 30));
+});
+
 app.get('/api/viec/:id/video', (req, res) => {
-  const tep = path.join(THU_MUC_DU_LIEU, path.basename(req.params.id), 'ra.mp4');
+  const ten = ['ra.mp4', 'ra-ngang.mp4', 'ra-doc.mp4', 'ra-vuong.mp4'].includes(req.query.ban)
+    ? req.query.ban : 'ra.mp4';
+  const tep = path.join(THU_MUC_DU_LIEU, path.basename(req.params.id), ten);
   if (!existsSync(tep)) return res.status(404).json({ loi: 'Chưa có video đầu ra.' });
   res.sendFile(tep);
 });

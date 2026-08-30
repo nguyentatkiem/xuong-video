@@ -8,10 +8,27 @@
   "khung": "ngang",
   "catImLang": true,
   "mucCatMacDinh": "manh",
-  "zoom": { "batTat": true, "matDo": "day", "tiLe": 1.15 },
+  "zoom": {
+    "batTat": true,
+    "matDo": "day",
+    "tiLe": 1.15
+  },
   "phuDe": "tu",
   "tuKhoa": true,
   "mauSac": "khong",
   "theChuong": false,
-  "loudnorm": true
+  "loudnorm": true,
+  "dongTacChoPhep": [
+    "punch-in",
+    "rung",
+    "push-in",
+    "pan-trai",
+    "pan-phai"
+  ],
+  "sfx": true,
+  "flash": true,
+  "progressBar": true,
+  "chuKieu": {
+    "nhomTu": 3
+  }
 }

@@ -8,10 +8,21 @@
   "khung": "ngang",
   "catImLang": true,
   "mucCatMacDinh": "vua",
-  "zoom": { "batTat": true, "matDo": "thua", "tiLe": 1.08 },
+  "zoom": {
+    "batTat": true,
+    "matDo": "thua",
+    "tiLe": 1.08
+  },
   "phuDe": "dong",
   "tuKhoa": false,
   "mauSac": "toi",
   "theChuong": false,
-  "loudnorm": true
+  "loudnorm": true,
+  "dongTacChoPhep": [
+    "push-in",
+    "pull-out",
+    "tinh"
+  ],
+  "sfx": false,
+  "progressBar": false
 }

@@ -19,21 +19,41 @@ Yêu cầu máy có sẵn:
 | `claude` CLI | ⚪ | Không có/không đăng nhập → app tự dùng nhịp edit dự phòng, vẫn ra video. |
 | `mlx_whisper` | ⚪ | `uv tool install mlx-whisper` (Apple Silicon). Không có → bỏ qua phụ đề + từ khoá, các bước khác vẫn chạy. Lần dựng đầu sẽ tải model (~1,6GB). |
 
-Biến môi trường: `PORT` (mặc định 5675), `XUONG_FFMPEG` (ép đường dẫn ffmpeg), `XUONG_MODEL` (model cho claude, ví dụ `claude-sonnet-5`), `XUONG_BO_QUA_CLAUDE=1` (tắt đạo diễn AI), `XUONG_WHISPER_MODEL` (mặc định `mlx-community/whisper-large-v3-turbo`), `XUONG_NGON_NGU` (mặc định `vi`).
+Biến môi trường: `PORT` (mặc định 5675), `XUONG_FFMPEG` (ép đường dẫn ffmpeg), `XUONG_MODEL` (model cho claude, ví dụ `claude-sonnet-5`), `XUONG_BO_QUA_CLAUDE=1` (tắt đạo diễn AI), `XUONG_WHISPER_MODEL` (mặc định `mlx-community/whisper-large-v3-turbo`), `XUONG_NGON_NGU` (mặc định `vi`), `XUONG_DAO_DIEN_MAT=0` (tắt việc đạo diễn xem khung hình), `XUONG_TU_SOAT=0` (tắt lượt tự soát), `XUONG_PEXELS_KEY` (bật ảnh stock Pexels).
 
 > Lưu ý PATH: whisper tự gọi `ffmpeg` trong PATH để đọc audio — app đã tự chèn thư mục của bản ffmpeg tốt vào PATH khi gọi whisper, nên không cần chỉnh gì thêm.
 
-## Pipeline (6 bước cho mỗi video)
+## Pipeline v2 (8 bước cho mỗi video)
 
 ```
 video gốc
  1. ffprobe        → đọc thông tin
- 2. silencedetect  → CẮT KHOẢNG LẶNG + đổi khung (16:9 / 9:16 crop / 9:16 nền mờ) + chuẩn âm lượng loudnorm
- 3. whisper        → transcript từng từ (nếu máy có)
- 4. claude -p      → "đạo diễn": điểm zoom, từ khoá pop, chương, tiêu đề/mô tả/tags (EDL JSON)
- 5. ffmpeg render  → zoom nhấn nhá + màu + phụ đề ASS (karaoke từng-từ hoặc dòng) + tiêu đề/watermark/thẻ chương + fade
- 6. xuất bản       → ra.mp4 + mo-ta-seo.md + phu-de.srt + bao-cao.json
+ 2. silencedetect  → CẮT KHOẢNG LẶNG
+ 3. whisper        → transcript từng từ (large-v3-turbo, tiếng Việt)
+ 4. claude -p      → ĐẠO DIỄN CÓ MẮT: tự Read các khung hình mẫu + transcript + manifest media
+                     → EDL v2: chia CẢNH gán động tác camera, từ khoá, chương, ảnh chèn,
+                       số đếm, cặp sửa lỗi transcript, tiêu đề/mô tả/tags
+ 5. ffmpeg render  → CAMERA ẢO (push-in / pull-out / pan trái-phải / punch-in / rung)
+                     + flash chuyển chương + màu + ảnh/B-roll overlay
+                     + phụ đề karaoke có tô từ khoá + thẻ chương động + progress bar
+                     + counter số chạy + CTA cuối + SFX bám sự kiện + nhạc nền ducking → −14 LUFS
+ 6. tự soát        → claude xem khung hình BẢN DỰNG, chưa đạt thì tự sửa EDL và render lại 1 lần
+ 7. xuất đa khung  → tuỳ chọn thêm 16:9 / 9:16 / 1:1 dùng chung EDL
+ 8. xuất bản       → ra*.mp4 + mo-ta-seo.md + phu-de.srt + bao-cao.json
 ```
+
+## CLI dựng hàng loạt
+
+```bash
+node scripts/dung.js video.mp4 --style podcast-hormozi --tieu-de "..." --ten-kenh "@kenh"
+node scripts/dung.js thu-muc/ --style storytime --muc-cat manh --xuat-them ngang,vuong
+```
+
+## Thư viện của kênh
+
+- `media/` + `media/manifest.json` — ảnh/B-roll của kênh kèm mô tả; đạo diễn chỉ được chèn tệp có trong manifest. Có `XUONG_PEXELS_KEY` thì đạo diễn được phép yêu cầu ảnh stock (`"tep": "pexels:mô tả"`).
+- `sfx/` — 5 tệp tổng hợp sẵn (whoosh/pop/ding/tick/riser, tạo bởi `scripts/tao-sfx.sh`), thay tệp xịn hơn tuỳ ý.
+- `nhac/` — nhạc nền theo mood (xem `nhac/DOC-TOI.md`); tự ducking khi có giọng nói.
 
 ## Style
 
@@ -63,7 +83,7 @@ Dữ liệu mỗi lần dựng nằm ở `du-lieu/viec/<id>/` (video gốc, các
 
 ## Lộ trình (chưa làm)
 
-- Ảnh/B-roll pop-up: claude đề xuất "giây nào cần ảnh gì", ghép từ thư viện ảnh của kênh
-- SFX whoosh/pop đồng bộ hiệu ứng + cắt theo beat nhạc nền
-- Xuất đồng thời 3 khung 16:9 / 9:16 / 1:1 cho một lần dựng
-- Speed ramp, chuyển cảnh xfade, counter số chạy (cần chuyển renderer sang Remotion)
+- Speed-ramp có giữ khớp tiếng (đổi kiến trúc lượt 1)
+- Cắt theo beat nhạc nền (aubio) + whip-pan có nhoè chuyển động
+- Chuyển renderer sang Remotion cho bảng so sánh/scorecard động ngoài tầm ASS
+- Nhiều worker song song cho hàng đợi

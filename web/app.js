@@ -104,6 +104,14 @@ $('nut-chay').addEventListener('click', () => {
   duLieu.append('tenKenh', $('o-ten-kenh').value);
   duLieu.append('mucCat', $('o-muc-cat').value);
 
+  const tinhChinh = {};
+  if ($('o-mat-do').value) tinhChinh.matDo = $('o-mat-do').value;
+  if ($('o-phu-de').value) tinhChinh.phuDe = $('o-phu-de').value;
+  if ($('o-sfx').value) tinhChinh.sfx = $('o-sfx').value === 'bat';
+  duLieu.append('tinhChinh', JSON.stringify(tinhChinh));
+  duLieu.append('xuatThem', ['k-ngang', 'k-doc', 'k-vuong']
+    .filter((k) => $(k).checked).map((k) => $(k).value).join(','));
+
   $('nut-chay').disabled = true;
   $('the-ket-qua').classList.add('an');
   $('the-tien-do').classList.remove('an');
@@ -169,11 +177,30 @@ function hienLoi(chu) {
 }
 
 // ── Kết quả ────────────────────────────────────────────────────────────
+const TEN_BAN = { 'ra.mp4': 'Bản chính', 'ra-ngang.mp4': 'Ngang 16:9', 'ra-doc.mp4': 'Dọc 9:16', 'ra-vuong.mp4': 'Vuông 1:1' };
+
 async function hienKetQua(id, v) {
   $('the-tien-do').classList.add('an');
   $('the-ket-qua').classList.remove('an');
   $('video-ra').src = `/api/viec/${id}/video`;
   $('tai-video').href = `/api/viec/${id}/video`;
+
+  // các bản khung hình khác
+  const cacBan = ['ra.mp4', ...((v.baoCao && v.baoCao.khungThem) || [])];
+  if (cacBan.length > 1) {
+    $('tab-ban').classList.remove('an');
+    $('tab-ban').innerHTML = cacBan.map((b, i) =>
+      `<button data-ban="${b}" class="${i === 0 ? 'chon' : ''}">${TEN_BAN[b] || b}</button>`).join('');
+    $('tab-ban').querySelectorAll('button').forEach((nut) =>
+      nut.addEventListener('click', () => {
+        $('tab-ban').querySelectorAll('button').forEach((n) => n.classList.remove('chon'));
+        nut.classList.add('chon');
+        $('video-ra').src = `/api/viec/${id}/video?ban=${nut.dataset.ban}`;
+        $('tai-video').href = `/api/viec/${id}/video?ban=${nut.dataset.ban}`;
+      }));
+  } else {
+    $('tab-ban').classList.add('an');
+  }
   $('tai-seo').href = `/api/viec/${id}/tep/mo-ta-seo.md`;
   $('tai-seo').setAttribute('download', 'mo-ta-seo.md');
 
@@ -190,7 +217,9 @@ async function hienKetQua(id, v) {
   $('bao-cao').innerHTML = [
     o(`${(bc.thoiLuongGoc ?? 0).toFixed(0)}s → ${(bc.thoiLuongSauCat ?? 0).toFixed(0)}s`, 'thời lượng gốc → sau cắt'),
     o(`${(bc.giayDaCat ?? 0).toFixed(1)}s`, `im lặng đã cắt (${bc.soDoanCat ?? 0} chỗ)`),
-    o(bc.soZoom ?? 0, 'điểm zoom nhấn'),
+    o(bc.soCanh ?? 0, 'cảnh camera ảo'),
+    o(bc.soSfx ?? 0, 'hiệu ứng âm thanh'),
+    o(bc.soAnh ?? 0, 'ảnh minh hoạ chèn'),
     o(bc.daoDien === 'claude' ? 'Claude' : 'Nhịp tự động', 'đạo diễn dựng'),
   ].join('');
 
@@ -210,5 +239,23 @@ $('nut-lam-lai').addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
+// ── Lịch sử việc ───────────────────────────────────────────────────────
+async function napLichSu() {
+  try {
+    const ds = await (await fetch('/api/lich-su')).json();
+    if (!ds.length) return;
+    $('the-lich-su').classList.remove('an');
+    $('danh-sach-lich-su').innerHTML = ds.map((v) => {
+      const luc = v.luc ? new Date(v.luc).toLocaleString('vi-VN') : '';
+      return `<li>
+        <a href="/api/viec/${v.id}/video" target="_blank">▶ ${v.tieuDe || v.id}</a>
+        <span class="luc">${v.style} · ${(v.thoiLuong ?? 0).toFixed(0)}s · ${luc}</span>
+        <a href="/api/viec/${v.id}/tep/mo-ta-seo.md" target="_blank">SEO</a>
+      </li>`;
+    }).join('');
+  } catch { /* chưa có lịch sử */ }
+}
+
 capNhatNutChay();
 napStyle();
+napLichSu();

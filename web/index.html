@@ -71,6 +71,36 @@
           <option value="tat">Tắt — giữ nguyên</option>
         </select>
       </label>
+      <label>Hiệu ứng camera
+        <select id="o-mat-do">
+          <option value="" selected>Theo style</option>
+          <option value="day">Dày — biến cố mỗi ~3 giây</option>
+          <option value="vua">Vừa</option>
+          <option value="thua">Thưa — điềm đạm</option>
+          <option value="tat">Tắt hẳn</option>
+        </select>
+      </label>
+      <label>Phụ đề
+        <select id="o-phu-de">
+          <option value="" selected>Theo style</option>
+          <option value="tu">Karaoke từng-từ</option>
+          <option value="dong">Dòng dưới màn hình</option>
+          <option value="khong">Tắt</option>
+        </select>
+      </label>
+      <label>Hiệu ứng âm thanh (SFX)
+        <select id="o-sfx">
+          <option value="" selected>Theo style</option>
+          <option value="bat">Bật</option>
+          <option value="tat">Tắt</option>
+        </select>
+      </label>
+    </div>
+    <div class="khung-them">
+      <span class="nhan-khung">Xuất thêm khung:</span>
+      <label class="o-check"><input type="checkbox" id="k-ngang" value="ngang"> Ngang 16:9</label>
+      <label class="o-check"><input type="checkbox" id="k-doc" value="doc-crop"> Dọc 9:16</label>
+      <label class="o-check"><input type="checkbox" id="k-vuong" value="vuong"> Vuông 1:1</label>
     </div>
   </section>
 
@@ -88,6 +118,7 @@
   <!-- Kết quả -->
   <section class="the an" id="the-ket-qua">
     <h2><span class="so-buoc">✓</span> Video đã dựng xong</h2>
+    <div class="tab-nhom an" id="tab-ban"></div>
     <video id="video-ra" controls playsinline></video>
     <div class="hang-nut">
       <a class="nut-phu chinh-nut" id="tai-video" download="video-da-dung.mp4">⬇️ Tải video</a>
@@ -97,6 +128,12 @@
     </div>
     <div class="bao-cao" id="bao-cao"></div>
     <details class="seo" id="khoi-seo"><summary>Xem gói SEO (tiêu đề · mô tả · chapters · tags)</summary><pre id="noi-dung-seo"></pre></details>
+  </section>
+
+  <!-- Lịch sử -->
+  <section class="the an" id="the-lich-su">
+    <h2><span class="so-buoc">🕘</span> Việc đã dựng gần đây</h2>
+    <ul class="danh-sach-lich-su" id="danh-sach-lich-su"></ul>
   </section>
 
 </main>

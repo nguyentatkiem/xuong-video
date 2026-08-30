@@ -90,6 +90,18 @@ main { padding: 26px 20px 60px; }
 }
 .luoi-tuy-chon input:focus, .luoi-tuy-chon select:focus { outline: 2px solid var(--xanh-nhat); border-color: var(--xanh); }
 
+/* Khung xuất thêm + lịch sử */
+.khung-them { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; margin-top: 14px; font-size: 13.5px; }
+.nhan-khung { font-weight: 600; }
+.o-check { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; color: var(--chu); }
+.o-check input { accent-color: var(--xanh); width: 16px; height: 16px; }
+.danh-sach-lich-su { list-style: none; }
+.danh-sach-lich-su li { display: flex; gap: 10px; align-items: baseline; padding: 8px 4px; border-bottom: 1px dashed var(--vien); font-size: 14px; flex-wrap: wrap; }
+.danh-sach-lich-su li:last-child { border-bottom: none; }
+.danh-sach-lich-su .luc { color: var(--chu-mo); font-size: 12.5px; }
+.danh-sach-lich-su a { color: var(--xanh-dam); font-weight: 600; text-decoration: none; }
+.danh-sach-lich-su a:hover { text-decoration: underline; }
+
 /* Nút lớn */
 .nut-lon {
   width: 100%; background: var(--xanh); color: #fff; border: none; border-radius: 12px;
