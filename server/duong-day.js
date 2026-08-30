@@ -44,11 +44,13 @@ export async function chonFfmpeg() {
 }
 
 /** Chạy một tiến trình, trả {ma, out, err}. KHÔNG ném lỗi — nơi gọi tự quyết. */
-function chayLenh(lenh, args, { cwd, stdinText = null, gioiHanGiay = 1800 } = {}) {
+function chayLenh(lenh, args, { cwd, stdinText = null, gioiHanGiay = 1800, themPath = null } = {}) {
   return new Promise((resolve) => {
     const moiTruong = { ...process.env };
     delete moiTruong.CLAUDECODE;
     delete moiTruong.CLAUDE_CODE_ENTRYPOINT;
+    // whisper gọi `ffmpeg` trong PATH để đọc audio — chèn thư mục ffmpeg tốt lên đầu
+    if (themPath) moiTruong.PATH = `${themPath}:${moiTruong.PATH || ''}`;
     const tt = spawn(lenh, args, { cwd, env: moiTruong });
     let out = '', err = '';
     const henGio = setTimeout(() => tt.kill('SIGKILL'), gioiHanGiay * 1000);
@@ -191,10 +193,15 @@ export async function chayViec(viec, ganBuoc) {
   if (lenhWhisper && style.phuDe !== 'khong') {
     try {
       await ffmpeg(['-i', 'buoc1.mp4', '-vn', '-ar', '16000', '-ac', '1', 'tieng.wav'], thuMuc);
+      const ngonNgu = process.env.XUONG_NGON_NGU || 'vi';
+      const model = process.env.XUONG_WHISPER_MODEL
+        || (lenhWhisper === 'mlx_whisper' ? 'mlx-community/whisper-large-v3-turbo' : 'small');
       const args = lenhWhisper === 'mlx_whisper'
-        ? ['tieng.wav', '--output-dir', '.', '--output-format', 'json', '--word-timestamps', 'True', '--language', 'vi']
-        : ['tieng.wav', '--output_dir', '.', '--output_format', 'json', '--word_timestamps', 'True', '--language', 'vi', '--model', 'small'];
-      const kq = await chayLenh(lenhWhisper, args, { cwd: thuMuc, gioiHanGiay: 3600 });
+        ? ['tieng.wav', '--model', model, '--output-dir', '.', '--output-format', 'json', '--word-timestamps', 'True', '--language', ngonNgu]
+        : ['tieng.wav', '--output_dir', '.', '--output_format', 'json', '--word_timestamps', 'True', '--language', ngonNgu, '--model', model];
+      const kq = await chayLenh(lenhWhisper, args, {
+        cwd: thuMuc, gioiHanGiay: 3600, themPath: path.dirname(FFMPEG),
+      });
       if (kq.ma === 0 && existsSync(path.join(thuMuc, 'tieng.json'))) {
         transcript = docTranscriptWhisper(JSON.parse(await readFile(path.join(thuMuc, 'tieng.json'), 'utf8')));
       }

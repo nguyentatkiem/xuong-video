@@ -17,9 +17,11 @@ Yêu cầu máy có sẵn:
 |---|---|---|
 | `ffmpeg` **bản đầy đủ** | ✅ | `brew install ffmpeg-full` — bản `ffmpeg` gọn của Homebrew **thiếu libass**, sẽ không vẽ được chữ/phụ đề. App tự ưu tiên `/opt/homebrew/opt/ffmpeg-full/bin/ffmpeg` nếu có. |
 | `claude` CLI | ⚪ | Không có/không đăng nhập → app tự dùng nhịp edit dự phòng, vẫn ra video. |
-| `mlx_whisper` | ⚪ | `pip install mlx-whisper` (Apple Silicon). Không có → bỏ qua phụ đề + từ khoá, các bước khác vẫn chạy. |
+| `mlx_whisper` | ⚪ | `uv tool install mlx-whisper` (Apple Silicon). Không có → bỏ qua phụ đề + từ khoá, các bước khác vẫn chạy. Lần dựng đầu sẽ tải model (~1,6GB). |
 
-Biến môi trường: `PORT` (mặc định 5675), `XUONG_FFMPEG` (ép đường dẫn ffmpeg), `XUONG_MODEL` (model cho claude, ví dụ `claude-sonnet-5`), `XUONG_BO_QUA_CLAUDE=1` (tắt đạo diễn AI).
+Biến môi trường: `PORT` (mặc định 5675), `XUONG_FFMPEG` (ép đường dẫn ffmpeg), `XUONG_MODEL` (model cho claude, ví dụ `claude-sonnet-5`), `XUONG_BO_QUA_CLAUDE=1` (tắt đạo diễn AI), `XUONG_WHISPER_MODEL` (mặc định `mlx-community/whisper-large-v3-turbo`), `XUONG_NGON_NGU` (mặc định `vi`).
+
+> Lưu ý PATH: whisper tự gọi `ffmpeg` trong PATH để đọc audio — app đã tự chèn thư mục của bản ffmpeg tốt vào PATH khi gọi whisper, nên không cần chỉnh gì thêm.
 
 ## Pipeline (6 bước cho mỗi video)
 
