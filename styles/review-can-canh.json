@@ -1,0 +1,17 @@
+{
+  "id": "review-can-canh",
+  "ten": "Review cận cảnh",
+  "nhom": "review",
+  "bieuTuong": "🔍",
+  "thuTu": 8,
+  "moTa": "Review sản phẩm: màu ấm tôn sản phẩm, zoom nhấn vào ý chính, phụ đề dòng, từ khoá thông số bật lên đúng lúc.",
+  "khung": "ngang",
+  "catImLang": true,
+  "mucCatMacDinh": "vua",
+  "zoom": { "batTat": true, "matDo": "thua", "tiLe": 1.1 },
+  "phuDe": "dong",
+  "tuKhoa": true,
+  "mauSac": "am",
+  "theChuong": false,
+  "loudnorm": true
+}

@@ -1,0 +1,17 @@
+{
+  "id": "storytime",
+  "ten": "Storytime minh hoạ",
+  "nhom": "vlog",
+  "bieuTuong": "📖",
+  "thuTu": 3,
+  "moTa": "Kể chuyện dạng dọc: phụ đề từng-từ, zoom nhấn lúc cao trào, từ khoá bật giữa màn hình giữ người xem tới giây cuối.",
+  "khung": "doc-blur",
+  "catImLang": true,
+  "mucCatMacDinh": "manh",
+  "zoom": { "batTat": true, "matDo": "day", "tiLe": 1.1 },
+  "phuDe": "tu",
+  "tuKhoa": true,
+  "mauSac": "am",
+  "theChuong": false,
+  "loudnorm": true
+}

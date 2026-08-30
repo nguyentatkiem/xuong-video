@@ -1,0 +1,17 @@
+{
+  "id": "fast-paced",
+  "ten": "Fast-paced dồn dập",
+  "nhom": "congnghe",
+  "bieuTuong": "⚡",
+  "thuTu": 5,
+  "moTa": "Kiểu Fireship: cắt im lặng mạnh tay, zoom dày, từ khoá đập lên liên tục — mật độ biến cố cao nhất cho video kiến thức nhanh.",
+  "khung": "ngang",
+  "catImLang": true,
+  "mucCatMacDinh": "manh",
+  "zoom": { "batTat": true, "matDo": "day", "tiLe": 1.15 },
+  "phuDe": "tu",
+  "tuKhoa": true,
+  "mauSac": "khong",
+  "theChuong": false,
+  "loudnorm": true
+}

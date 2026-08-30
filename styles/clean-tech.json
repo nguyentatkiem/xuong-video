@@ -1,0 +1,17 @@
+{
+  "id": "clean-tech",
+  "ten": "Clean Tech tối giản",
+  "nhom": "congnghe",
+  "bieuTuong": "💻",
+  "thuTu": 4,
+  "moTa": "Kiểu MKBHD: khung ngang, màu tối sang, cắt gọn nhưng không dồn dập, phụ đề dòng tiết chế, không hiệu ứng thừa.",
+  "khung": "ngang",
+  "catImLang": true,
+  "mucCatMacDinh": "vua",
+  "zoom": { "batTat": true, "matDo": "thua", "tiLe": 1.08 },
+  "phuDe": "dong",
+  "tuKhoa": false,
+  "mauSac": "toi",
+  "theChuong": false,
+  "loudnorm": true
+}

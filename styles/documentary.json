@@ -1,0 +1,17 @@
+{
+  "id": "documentary",
+  "ten": "Documentary deep-dive",
+  "nhom": "dadung",
+  "bieuTuong": "🎞️",
+  "thuTu": 11,
+  "moTa": "Phim tài liệu: màu điện ảnh có vignette, thẻ chương, cắt nhẹ giữ mạch kể, phụ đề dòng — cho video dài 10+ phút.",
+  "khung": "ngang",
+  "catImLang": true,
+  "mucCatMacDinh": "nhe",
+  "zoom": { "batTat": true, "matDo": "thua", "tiLe": 1.06 },
+  "phuDe": "dong",
+  "tuKhoa": false,
+  "mauSac": "phim",
+  "theChuong": true,
+  "loudnorm": true
+}

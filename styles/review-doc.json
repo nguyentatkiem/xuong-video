@@ -1,0 +1,17 @@
+{
+  "id": "review-doc",
+  "ten": "Review dọc TikTok",
+  "nhom": "review",
+  "bieuTuong": "📱",
+  "thuTu": 9,
+  "moTa": "Review nhanh khung dọc: video ngang đặt giữa nền mờ, phụ đề từng-từ, cắt mạnh, từ khoá — cho TikTok Shop / Reels.",
+  "khung": "doc-blur",
+  "catImLang": true,
+  "mucCatMacDinh": "manh",
+  "zoom": { "batTat": true, "matDo": "day", "tiLe": 1.1 },
+  "phuDe": "tu",
+  "tuKhoa": true,
+  "mauSac": "khong",
+  "theChuong": false,
+  "loudnorm": true
+}

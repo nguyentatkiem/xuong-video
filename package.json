@@ -1,0 +1,14 @@
+{
+  "name": "xuong-video",
+  "version": "0.1.0",
+  "description": "Cỗ máy dựng video tự động: kéo thả video, chọn style, nhận video đã edit",
+  "type": "module",
+  "scripts": {
+    "dev": "node server/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "multer": "^2.0.2"
+  }
+}

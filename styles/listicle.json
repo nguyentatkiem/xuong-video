@@ -1,0 +1,17 @@
+{
+  "id": "listicle",
+  "ten": "Listicle Top N",
+  "nhom": "dadung",
+  "bieuTuong": "🔢",
+  "thuTu": 10,
+  "moTa": "Video dạng danh sách: thẻ chương hiện giữa màn hình khi sang mục mới, zoom vừa phải, phụ đề dòng — hợp mọi chủ đề Top 5/Top 10.",
+  "khung": "ngang",
+  "catImLang": true,
+  "mucCatMacDinh": "vua",
+  "zoom": { "batTat": true, "matDo": "thua", "tiLe": 1.1 },
+  "phuDe": "dong",
+  "tuKhoa": true,
+  "mauSac": "khong",
+  "theChuong": true,
+  "loudnorm": true
+}

@@ -1,0 +1,17 @@
+{
+  "id": "vlog-raw",
+  "ten": "Vlog đời thường",
+  "nhom": "vlog",
+  "bieuTuong": "🏃",
+  "thuTu": 6,
+  "moTa": "Kiểu Casey Neistat: jump cut dày từ cắt im lặng mạnh, không phụ đề, không màu mè — năng lượng đến từ nhịp cắt.",
+  "khung": "ngang",
+  "catImLang": true,
+  "mucCatMacDinh": "manh",
+  "zoom": { "batTat": false },
+  "phuDe": "khong",
+  "tuKhoa": false,
+  "mauSac": "khong",
+  "theChuong": false,
+  "loudnorm": true
+}

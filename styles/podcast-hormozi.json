@@ -1,0 +1,17 @@
+{
+  "id": "podcast-hormozi",
+  "ten": "Clip dọc Hormozi",
+  "nhom": "podcast",
+  "bieuTuong": "🎙️",
+  "thuTu": 1,
+  "moTa": "Khung dọc 9:16, phụ đề từng-từ to giữa màn hình, zoom giật theo câu, từ khoá bật lên — chuẩn clip podcast viral TikTok/Reels.",
+  "khung": "doc-crop",
+  "catImLang": true,
+  "mucCatMacDinh": "manh",
+  "zoom": { "batTat": true, "matDo": "day", "tiLe": 1.12 },
+  "phuDe": "tu",
+  "tuKhoa": true,
+  "mauSac": "khong",
+  "theChuong": false,
+  "loudnorm": true
+}

@@ -1,0 +1,17 @@
+{
+  "id": "podcast-tram",
+  "ten": "Podcast trầm chuyên nghiệp",
+  "nhom": "podcast",
+  "bieuTuong": "🎧",
+  "thuTu": 2,
+  "moTa": "Khung ngang tối trầm kiểu Lex Fridman: phụ đề dòng tinh tế, không zoom, màu điện ảnh, watermark kênh — cho bản full podcast.",
+  "khung": "ngang",
+  "catImLang": true,
+  "mucCatMacDinh": "nhe",
+  "zoom": { "batTat": false },
+  "phuDe": "dong",
+  "tuKhoa": false,
+  "mauSac": "toi",
+  "theChuong": true,
+  "loudnorm": true
+}
