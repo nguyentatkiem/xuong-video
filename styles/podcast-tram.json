@@ -74,6 +74,8 @@
     "progress"
   ],
   "chuyenCanh": [
-    "fade"
-  ]
+    "fade",
+    "dissolve"
+  ],
+  "lut": "noir-tuong-phan"
 }

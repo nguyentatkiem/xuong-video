@@ -67,6 +67,8 @@
   ],
   "chuyenCanh": [
     "slideup",
-    "circleopen"
+    "circleopen",
+    "vuslice",
+    "rectcrop"
   ]
 }

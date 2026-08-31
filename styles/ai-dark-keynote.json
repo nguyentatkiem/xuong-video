@@ -65,7 +65,10 @@
     "circleopen",
     "slideleft",
     "fadeblack",
-    "smoothup"
+    "smoothup",
+    "diagtr",
+    "zoomin",
+    "hlslice"
   ],
   "remotion": true
 }

@@ -4,6 +4,7 @@ import { IntroBrand } from './comps/IntroBrand';
 import { Scorecard } from './comps/Scorecard';
 import { SoSanh } from './comps/SoSanh';
 import { OutroCta } from './comps/OutroCta';
+import { ManHinhCuoi } from './comps/ManHinhCuoi';
 import { SKIN_MAC_DINH } from './comps/chung';
 
 // Kích thước/thời lượng lấy từ inputProps lúc render (calculateMetadata)
@@ -28,5 +29,8 @@ export const Root: React.FC = () => (
     <Composition id="outro" component={OutroCta} width={1080} height={1920} fps={30}
       durationInFrames={105} calculateMetadata={đo}
       defaultProps={{ loiKeu: 'ĐĂNG KÝ KÊNH', kenh: '@kenh', skin: SKIN_MAC_DINH, rong: 1080, cao: 1920, giay: 3.5 }} />
+    <Composition id="endscreen" component={ManHinhCuoi} width={1080} height={1920} fps={30}
+      durationInFrames={150} calculateMetadata={đo}
+      defaultProps={{ loiKeu: 'ĐĂNG KÝ', kenh: '@kenh', skin: SKIN_MAC_DINH, rong: 1080, cao: 1920, giay: 5 }} />
   </>
 );

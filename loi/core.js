@@ -204,6 +204,57 @@ export function xayDoLocPass2({
   return { filterComplex: phan.join(';'), mapVideo: '[vout]' };
 }
 
+/** Đọc stderr freezedetect → các khoảng ĐỨNG HÌNH [{batDau, ketThuc}]. */
+export function phanTichDungHinh(vanBan, tongThoiLuong = Infinity) {
+  const kq = [];
+  let mo = null;
+  for (const dong of vanBan.split('\n')) {
+    const b = dong.match(/freeze_start:\s*([\d.]+)/);
+    if (b) { mo = parseFloat(b[1]); continue; }
+    const k = dong.match(/freeze_end:\s*([\d.]+)/);
+    if (k && mo !== null) { kq.push({ batDau: mo, ketThuc: parseFloat(k[1]) }); mo = null; }
+  }
+  if (mo !== null && Number.isFinite(tongThoiLuong)) kq.push({ batDau: mo, ketThuc: tongThoiLuong });
+  return kq;
+}
+
+/** Đọc stderr select+showinfo → các mốc ĐỔI CẢNH quay (giây trên video gốc). */
+export function phanTichDoiCanh(vanBan) {
+  const kq = [];
+  for (const m of vanBan.matchAll(/pts_time:([\d.]+)/g)) kq.push(parseFloat(m[1]));
+  return [...new Set(kq)].sort((a, b) => a - b).slice(0, 60);
+}
+
+/**
+ * Cắt thông minh kiểu auto-editor: chỉ cắt khoảng lặng khi hình cũng ĐỨNG.
+ * Im lặng nhưng đang có cử động (demo tay, sản phẩm xoay) → giữ lại.
+ */
+export function locImLangTheoDongCu(imLang, dungHinh, { tiLeDung = 0.6 } = {}) {
+  if (!dungHinh?.length) return [];
+  return imLang.filter((kl) => {
+    const dai = kl.ketThuc - kl.batDau;
+    if (dai <= 0) return false;
+    let phu = 0;
+    for (const dh of dungHinh) {
+      phu += Math.max(0, Math.min(kl.ketThuc, dh.ketThuc) - Math.max(kl.batDau, dh.batDau));
+    }
+    return phu / dai >= tiLeDung;
+  });
+}
+
+/** Ánh xạ giây trên video GỐC → giây trên video ĐÃ CẮT; trả null nếu mốc bị cắt bỏ. */
+export function taoAnhXaCat(doanGiu) {
+  return (t) => {
+    let cong = 0;
+    for (const d of doanGiu) {
+      if (t < d.batDau) return null;
+      if (t <= d.ketThuc) return cong + (t - d.batDau);
+      cong += d.ketThuc - d.batDau;
+    }
+    return null;
+  };
+}
+
 /** Chuẩn hoá danh sách speed-ramp từ đạo diễn: kẹp 0.5–2.0, đoạn ≥1.5s, không chồng lấn, ≤4. */
 export function chuanHoaRamp(tho, thoiLuong) {
   const so = (x) => (Number.isFinite(x) ? x : parseFloat(x));

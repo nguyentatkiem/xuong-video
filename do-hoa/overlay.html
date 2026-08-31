@@ -336,6 +336,23 @@ function anim(node, t){
         ctx.beginPath(); ctx.moveTo(x-s,y); ctx.lineTo(x+s,y);
         ctx.moveTo(x,y-s); ctx.lineTo(x,y+s); ctx.stroke();
       }
+    } else if(e.kieu==='vong-tron'){ // vòng tròn khoanh vùng vẽ dần
+      const k = Math.min(1,(tl)/0.6), nhip2 = 1+Math.sin(tl*3)*0.04;
+      ctx.strokeStyle=mau; ctx.lineWidth=W*0.055; ctx.lineCap='round';
+      ctx.beginPath();
+      ctx.ellipse(W/2,H/2,(W/2-W*0.08)*nhip2,(H/2-H*0.12)*nhip2,-0.12,-Math.PI/2,-Math.PI/2+k*Math.PI*2);
+      ctx.stroke();
+    } else if(e.kieu==='tim'){ // tim bay lên
+      for(let i=0;i<8;i++){
+        const ph=Math.sin(i*37.3)*1000, r=ph-Math.floor(ph);
+        const y=H-((tl*(30+r*45)+r*H)%(H+24))+12, x=r*W+Math.sin(tl*2.2+i)*10;
+        const s=(6+r*8);
+        ctx.fillStyle = i%3? mau : '#FF6B8A';
+        ctx.save(); ctx.translate(x,y); ctx.scale(s/10,s/10);
+        ctx.beginPath();
+        ctx.moveTo(0,4); ctx.bezierCurveTo(-8,-4,-3,-10,0,-5); ctx.bezierCurveTo(3,-10,8,-4,0,4);
+        ctx.fill(); ctx.restore();
+      }
     } else { // mui-ten: mũi tên nhún xuống
       const nhun = Math.abs(Math.sin(tl*3.1))*H*0.16;
       ctx.strokeStyle=mau; ctx.lineWidth=W*0.09; ctx.lineCap='round'; ctx.lineJoin='round';

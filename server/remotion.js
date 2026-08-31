@@ -31,7 +31,7 @@ async function layBundle() {
   return _serveUrl;
 }
 
-export const DS_MOTION = ['intro', 'scorecard', 'sosanh', 'outro'];
+export const DS_MOTION = ['intro', 'scorecard', 'sosanh', 'outro', 'endscreen'];
 
 /**
  * Render một màn motion → tệp webm alpha. Ném lỗi khi hỏng — nơi gọi tự quyết.

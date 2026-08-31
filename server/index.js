@@ -119,7 +119,7 @@ app.post('/api/viec', upload.single('video'), (req, res) => {
     tuyChon: {
       tieuDe: (req.body.tieuDe || '').trim().slice(0, 120),
       tenKenh: (req.body.tenKenh || '').trim().slice(0, 60),
-      mucCat: ['tat', 'nhe', 'vua', 'manh'].includes(req.body.mucCat) ? req.body.mucCat : 'vua',
+      mucCat: ['tat', 'nhe', 'vua', 'manh', 'thong-minh'].includes(req.body.mucCat) ? req.body.mucCat : 'vua',
       khungXuat: ['auto', 'ngang', 'doc-crop', 'doc-blur', 'vuong'].includes(req.body.khungXuat)
         ? req.body.khungXuat : 'auto',
       xuatThem,

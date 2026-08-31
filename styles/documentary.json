@@ -64,6 +64,9 @@
   ],
   "chuyenCanh": [
     "fadeblack",
-    "dissolve"
-  ]
+    "dissolve",
+    "circlecrop",
+    "diagtl"
+  ],
+  "lut": "phim-xanh-cam"
 }

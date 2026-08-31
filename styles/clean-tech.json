@@ -68,7 +68,9 @@
   "chuyenCanh": [
     "smoothleft",
     "circleopen",
-    "fade"
+    "fade",
+    "squeezeh",
+    "wipetl"
   ],
   "remotion": true
 }

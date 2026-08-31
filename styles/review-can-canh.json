@@ -67,7 +67,10 @@
   ],
   "chuyenCanh": [
     "slideleft",
-    "fadeblack"
+    "fadeblack",
+    "smoothright",
+    "zoomin"
   ],
-  "remotion": true
+  "remotion": true,
+  "lut": "kodak-am"
 }

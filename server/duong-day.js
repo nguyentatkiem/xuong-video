@@ -13,6 +13,7 @@ import {
   lamSachTranscript, nguongImLang, chonKhungXuat, vungNoiTuImLang,
   tinhKhoangTrong, gopTranscript, locKhucBu,
   chuanHoaRamp, taoAnhXaThoiGian, doiThoiGianTranscript,
+  phanTichDungHinh, phanTichDoiCanh, locImLangTheoDongCu, taoAnhXaCat,
 } from '../loi/core.js';
 import {
   xayDoLocPass2V2, xayLocAmThanh, taoSuKienSfx, canhDuPhong, chuanHoaCanh,
@@ -32,6 +33,7 @@ const MUC_CAT = {
   nhe: { noise: '-42dB', d: 1.2, dem: 0.35, imToiThieu: 0.6 },
   vua: { noise: '-38dB', d: 0.7, dem: 0.25, imToiThieu: 0.45 },
   manh: { noise: '-33dB', d: 0.45, dem: 0.15, imToiThieu: 0.35 },
+  'thong-minh': { noise: '-38dB', d: 0.6, dem: 0.2, imToiThieu: 0.45 }, // + xét cử động hình
 };
 
 // ── Chọn binary ffmpeg: ưu tiên bản có libass (vẽ chữ/phụ đề) ─────────
@@ -154,11 +156,19 @@ async function docSongAm(tepWav, cwd) {
 }
 
 async function timWhisper() {
-  for (const lenh of ['mlx_whisper', 'whisper']) {
+  const uuTien = process.env.XUONG_WHISPER_LENH
+    ? [process.env.XUONG_WHISPER_LENH, 'mlx_whisper', 'whisper', 'stable-ts']
+    : ['mlx_whisper', 'whisper', 'stable-ts'];
+  for (const lenh of uuTien) {
     const kq = await chayLenh('sh', ['-c', `command -v ${lenh}`]);
     if (kq.ma === 0) return lenh;
   }
   return null;
+}
+
+async function timDemucs() {
+  const kq = await chayLenh('sh', ['-c', 'command -v demucs']);
+  return kq.ma === 0;
 }
 
 function docTranscriptWhisper(j) {
@@ -265,7 +275,7 @@ Trả THÊM hai trường trong JSON:
 }
 
 /** Đạo diễn v2/v3: transcript + khung hình + manifest media → EDL đầy đủ. */
-async function goiDaoDien({ transcript, style, thoiLuong, tuyChon, tenTep, khungMau, manifest, cheDoHtml = false, khongGian = 'doc', coMotion = false }) {
+async function goiDaoDien({ transcript, style, thoiLuong, tuyChon, tenTep, khungMau, manifest, cheDoHtml = false, khongGian = 'doc', coMotion = false, mocCanh = [] }) {
   if (process.env.XUONG_BO_QUA_CLAUDE === '1') return null;
 
   const dongTacChoPhep = style.dongTacChoPhep?.length ? style.dongTacChoPhep : CAC_DONG_TAC;
@@ -278,6 +288,9 @@ async function goiDaoDien({ transcript, style, thoiLuong, tuyChon, tenTep, khung
   const phanMat = khungMau.length
     ? `\nKHUNG HÌNH MẪU — hãy dùng công cụ Read xem các ảnh sau để biết cảnh nào là mặt người (nên punch-in), cảnh nào là màn hình/tài liệu (nên pan chậm), cảnh tối/sáng:\n${khungMau.map((k) => `- ${k}`).join('\n')}`
     : '';
+  const phanCanh = mocCanh.length
+    ? `\nVideo gốc TỰ ĐỔI CẢNH QUAY tại các giây: ${mocCanh.map((t) => t.toFixed(1)).join(', ')} — ưu tiên đặt ranh giới cảnh/khung/chương TRÙNG các mốc này, đừng cắt giữa một cảnh quay.`
+    : '';
 
   const phanMedia = manifest.length
     ? `\nTHƯ VIỆN MEDIA CỦA KÊNH (chỉ được dùng đúng các tệp này trong "anh"):\n${manifest.map((m) => `- ${m.tep}: ${m.moTa}`).join('\n')}`
@@ -289,13 +302,14 @@ MÀN MOTION CAO CẤP (Remotion) — mỗi màn PHỦ TOÀN KHUNG trên nền m�
 - intro {duLieu:{tieuDe, kenh}} — mở màn thương hiệu, t=0, ~3s
 - scorecard {duLieu:{tieuChi:[{ten, diem 0-10}] ≤5, tong}} — CHỈ khi lời nói chấm điểm/đánh giá thật, ~5s
 - sosanh {duLieu:{traiTen, phaiTen, hang:[{ten, trai, phai}] ≤5}} — CHỈ khi so sánh 2 thứ có thông số thật, ~5s
-- outro {duLieu:{loiKeu, kenh}} — kêu gọi cuối video, t = cuối − 3.5s
+- outro {duLieu:{loiKeu, kenh}} — kêu gọi gọn cuối video, t = cuối − 3.5s
+- endscreen {duLieu:{loiKeu, kenh}} — màn hình cuối kiểu YouTube (2 ô video tiếp theo + nút đăng ký), t = cuối − 5s; chọn HOẶC outro HOẶC endscreen, không cả hai
 Ví dụ: "motion": [{"loai":"intro","t":0,"giay":3,"duLieu":{"tieuDe":"...","kenh":"..."}}]
 Trong lúc màn motion chiếu, ĐỪNG đặt module do_hoa trùng thời gian.` : '';
   const prompt = `Bạn là đạo diễn dựng video chuyên nghiệp. Video dài ${thoiLuong.toFixed(1)} giây, tên tệp gốc "${tenTep}".
 Style edit: ${style.ten} — ${style.moTa}
 Tiêu đề người dùng đặt (có thể trống): "${tuyChon.tieuDe || ''}". Tên kênh: "${tuyChon.tenKenh || ''}".
-${phanTranscript}${phanMat}${phanMedia}${phanDoHoa}${phanMotion}
+${phanTranscript}${phanMat}${phanCanh}${phanMedia}${phanDoHoa}${phanMotion}
 
 Trả về DUY NHẤT một JSON theo mẫu:
 {
@@ -349,6 +363,14 @@ Chấm nhanh và trả về DUY NHẤT một JSON:
 
 const SFX_CO_SAN = ['whoosh', 'pop', 'ding', 'tick', 'riser'];
 
+/** Bộ lọc màu của style: LUT .cube điện ảnh (ưu tiên) hoặc eq preset cũ. */
+function locMau(style) {
+  if (style.lut && existsSync(path.join(GOC, 'lut', style.lut + '.cube'))) {
+    return `lut3d='${path.join(GOC, 'lut', style.lut + '.cube')}'`;
+  }
+  return chuoiMau(style.mauSac || 'khong');
+}
+
 /**
  * Render chế độ ĐỒ HOẠ HTML: video lồng thẻ bo góc trên canvas (hoặc toàn khung
  * có camera ảo) + lớp module/phụ đề chụp qua Chromium + tiêu đề/watermark ASS + SFX.
@@ -376,7 +398,7 @@ async function renderKhungHtml({
 
     // canvas nền + mặt nạ bo góc theo từng hình khối thẻ
     await chupCanvas({ skin: style.skin || {}, khongGian, thuMuc, ten: `canvas-${hauTo}.png` });
-    const mau = chuoiMau(style.mauSac || 'khong');
+    const mau = locMau(style);
     // kích thước điểm ảnh phải CHẴN: crop yuv420 tự hạ chiều lẻ xuống 1px làm lệch với mặt nạ
     const chan = (v) => 2 * Math.round((v * TI_LE_NET) / 2);
     const dsMask = new Map();
@@ -458,7 +480,7 @@ async function renderKhungHtml({
     const thoiLuongNen = (await doThongTin(tepB1, thuMuc)).thoiLuong;
     const p2 = xayDoLocPass2V2({
       thoiLuong: thoiLuongNen, canh: edl.canh, kichThuoc,
-      mauSac: style.mauSac || 'khong', chuoiMauFn: chuoiMau,
+      mauSac: style.mauSac || 'khong', chuoiMauFn: () => locMau(style),
       flashGiay: [], anh: [], tepPhuDe: null, tepDoHoa: null, fade: false,
     });
     tepNen = `nen-${hauTo}.mp4`;
@@ -641,7 +663,7 @@ async function renderKhung({
   const p2 = xayDoLocPass2V2({
     thoiLuong: sau.thoiLuong,
     canh: edl.canh,
-    kichThuoc, mauSac: style.mauSac || 'khong', chuoiMauFn: chuoiMau,
+    kichThuoc, mauSac: style.mauSac || 'khong', chuoiMauFn: () => locMau(style),
     flashGiay: style.flash ? edl.chuong.map((c) => c.giay).filter((g) => g > 0.5) : [],
     anh: anhHopLe,
     tepPhuDe: CO_LIBASS ? tepPhuDe : null,
@@ -696,9 +718,26 @@ export async function chayViec(viec, ganBuoc) {
       '-hide_banner', '-i', tepGoc,
       '-af', `silencedetect=noise=${nguong}:d=${mucCat.d}`, '-f', 'null', '-',
     ], { cwd: thuMuc });
-    const imLang = phanTichImLang(kq.err, goc.thoiLuong);
+    let imLang = phanTichImLang(kq.err, goc.thoiLuong);
+    if (tuyChon.mucCat === 'thong-minh') {
+      // kiểu auto-editor: im lặng nhưng hình đang cử động (demo, sản phẩm xoay) → giữ
+      const kqDung = await chayLenh(FFMPEG, [
+        '-hide_banner', '-i', tepGoc, '-vf', 'freezedetect=n=-50dB:d=0.5', '-an', '-f', 'null', '-',
+      ], { cwd: thuMuc });
+      imLang = locImLangTheoDongCu(imLang, phanTichDungHinh(kqDung.err, goc.thoiLuong));
+    }
     ({ doanGiu, tongCat } = tinhDoanGiu(imLang, goc.thoiLuong, mucCat));
   }
+  // dò các mốc ĐỔI CẢNH quay của video gốc → ánh xạ sang timeline đã cắt
+  let mocCanh = [];
+  try {
+    const kqCanh = await chayLenh(FFMPEG, [
+      '-hide_banner', '-i', tepGoc,
+      '-vf', "scale=320:-2,select='gt(scene,0.35)',showinfo", '-an', '-f', 'null', '-',
+    ], { cwd: thuMuc, gioiHanGiay: 600 });
+    const anhXa = taoAnhXaCat(doanGiu);
+    mocCanh = phanTichDoiCanh(kqCanh.err).map(anhXa).filter((t) => t !== null);
+  } catch { /* không dò được đổi cảnh thì thôi */ }
   // dựng nhanh bản đã-cắt tạm để whisper + đạo diễn làm việc trên timeline cuối
   const p1tam = xayDoLocPass1({ doanGiu, khung: khungChinh, loudnorm: false });
   await ffmpeg([
@@ -727,8 +766,10 @@ export async function chayViec(viec, ganBuoc) {
     const args = lenhWhisper === 'mlx_whisper'
       ? [tepWav, '--model', model, '--output-dir', '.', '--output-format', 'json',
          '--word-timestamps', 'True', '--condition-on-previous-text', 'False', '--language', ngonNgu]
-      : [tepWav, '--output_dir', '.', '--output_format', 'json', '--word_timestamps', 'True',
-         '--condition_on_previous_text', 'False', '--language', ngonNgu, '--model', model];
+      : lenhWhisper === 'stable-ts'
+        ? [tepWav, '-o', tenGoc + '.json', '--language', ngonNgu, '--model', model, '-y']
+        : [tepWav, '--output_dir', '.', '--output_format', 'json', '--word_timestamps', 'True',
+           '--condition_on_previous_text', 'False', '--language', ngonNgu, '--model', model];
     const kq = await chayLenh(lenhWhisper, args, {
       cwd: thuMuc, gioiHanGiay: 3600, themPath: path.dirname(FFMPEG),
     });
@@ -739,17 +780,36 @@ export async function chayViec(viec, ganBuoc) {
   if (lenhWhisper && style.phuDe !== 'khong') {
     try {
       await ffmpeg(['-i', 'nhap.mp4', '-vn', '-ar', '16000', '-ac', '1', 'tieng.wav'], thuMuc);
-      transcript = await bocWav('tieng.wav', 'tieng');
+      let tepTieng = 'tieng.wav';
+      transcript = await bocWav(tepTieng, 'tieng');
       if (transcript) {
-        // whisper cả-tệp hay nuốt đoạn giữa khi nền ồn → tìm khoảng trống, bóc bù từng khúc
-        const { giu, khoangTrong } = tinhKhoangTrong(transcript, sauCat.thoiLuong);
+        // nền quá ồn (whisper hụt >30% thời lượng) → Demucs tách giọng rồi bóc lại
+        let { giu, khoangTrong } = tinhKhoangTrong(transcript, sauCat.thoiLuong);
+        const tongTrong = khoangTrong.reduce((s, k) => s + (k.ketThuc - k.batDau), 0);
+        if (tongTrong > sauCat.thoiLuong * 0.3 && await timDemucs()) {
+          ganBuoc('transcript', 'dang', `Nền ồn (whisper hụt ${Math.round(tongTrong / sauCat.thoiLuong * 100)}%) — Demucs tách giọng…`);
+          const kqDemucs = await chayLenh('demucs', [
+            '--two-stems=vocals', '-n', 'htdemucs', '-o', 'tach', 'tieng.wav',
+          ], { cwd: thuMuc, gioiHanGiay: 1800, themPath: path.dirname(FFMPEG) });
+          const tepVocal = path.join(thuMuc, 'tach', 'htdemucs', 'tieng', 'vocals.wav');
+          if (kqDemucs.ma === 0 && existsSync(tepVocal)) {
+            await ffmpeg(['-i', tepVocal, '-ar', '16000', '-ac', '1', 'tieng-vocal.wav'], thuMuc);
+            const banVocal = await bocWav('tieng-vocal.wav', 'tieng-vocal');
+            if (banVocal?.doan?.length >= (transcript.doan?.length || 0)) {
+              transcript = banVocal;
+              tepTieng = 'tieng-vocal.wav';
+              baoCao.tachGiong = true;
+              ({ giu, khoangTrong } = tinhKhoangTrong(transcript, sauCat.thoiLuong));
+            }
+          }
+        }
         transcript = { doan: giu };
         for (let i = 0; i < khoangTrong.length; i++) {
           const kt = khoangTrong[i];
           const batDau = Math.max(0, kt.batDau - 0.15);
           ganBuoc('transcript', 'dang', `Bóc bù khúc ${i + 1}/${khoangTrong.length} (${kt.batDau.toFixed(1)}–${kt.ketThuc.toFixed(1)}s)…`);
           await ffmpeg(['-ss', batDau.toFixed(2), '-t', (kt.ketThuc - batDau + 0.15).toFixed(2),
-            '-i', 'tieng.wav', `khuc-${i}.wav`], thuMuc);
+            '-i', tepTieng, `khuc-${i}.wav`], thuMuc);
           const phan = await bocWav(`khuc-${i}.wav`, `khuc-${i}`);
           if (phan?.doan?.length) {
             const doanBu = locKhucBu(transcript.doan, phan.doan.map((d) => ({
@@ -761,9 +821,9 @@ export async function chayViec(viec, ganBuoc) {
           }
         }
         // dò vùng có tiếng để neo nốt các cụm mốc rác còn sót
-        const amLuongTieng = await doAmLuong('tieng.wav', thuMuc);
+        const amLuongTieng = await doAmLuong(tepTieng, thuMuc);
         const kqIm = await chayLenh(FFMPEG, [
-          '-hide_banner', '-i', 'tieng.wav',
+          '-hide_banner', '-i', tepTieng,
           '-af', `silencedetect=noise=${nguongImLang(amLuongTieng, 'vua')}:d=0.35`, '-f', 'null', '-',
         ], { cwd: thuMuc });
         const vungNoi = vungNoiTuImLang(phanTichImLang(kqIm.err, sauCat.thoiLuong), sauCat.thoiLuong);
@@ -775,7 +835,7 @@ export async function chayViec(viec, ganBuoc) {
   baoCao.coTranscript = Boolean(transcript);
   baoCao.soKhucBu = soKhucBu;
   ganBuoc('transcript', transcript ? 'xong' : 'boqua', transcript
-    ? `${transcript.doan.length} câu (${lenhWhisper}${soKhucBu ? `, bóc bù ${soKhucBu} khúc whisper nuốt` : ''})`
+    ? `${transcript.doan.length} câu (${lenhWhisper}${baoCao.tachGiong ? ', Demucs đã tách giọng khỏi nền ồn' : ''}${soKhucBu ? `, bóc bù ${soKhucBu} khúc whisper nuốt` : ''})`
     : (style.phuDe === 'khong' ? 'Style này không dùng phụ đề'
       : 'Máy chưa cài whisper — bỏ qua phụ đề (cài: uv tool install mlx-whisper)'));
 
@@ -787,7 +847,10 @@ export async function chayViec(viec, ganBuoc) {
   const manifest = await docManifestAsync();
   const khungMau = process.env.XUONG_DAO_DIEN_MAT !== '0'
     ? await trichKhungMau('nhap.mp4', thuMuc, sauCat.thoiLuong) : [];
-  const mocCau = transcript ? transcript.doan.map((d) => d.ketThuc) : [];
+  const mocCau = [...new Set([
+    ...(transcript ? transcript.doan.map((d) => d.ketThuc) : []),
+    ...mocCanh,
+  ])].sort((a, b) => a - b);
   const dongTacChoPhep = style.dongTacChoPhep?.length ? style.dongTacChoPhep : null;
 
   let edl;
@@ -795,7 +858,7 @@ export async function chayViec(viec, ganBuoc) {
     const tho = await goiDaoDien({
       transcript, style, thoiLuong: sauCat.thoiLuong, tuyChon,
       tenTep: viec.tenTepGoc || path.basename(tepGoc), khungMau, manifest,
-      cheDoHtml, khongGian, coMotion,
+      cheDoHtml, khongGian, coMotion, mocCanh,
     });
     if (tho) {
       const v1 = chuanHoaEdl(tho, sauCat.thoiLuong, style);

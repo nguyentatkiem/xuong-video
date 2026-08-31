@@ -214,7 +214,7 @@ test('s3 và kichThuocKhung', () => {
 });
 
 // ── Vá lỗi từ video thật (31/08) ──────────────────────────────────────
-const { lamSachTranscript, nguongImLang, chonKhungXuat, vungNoiTuImLang, tinhKhoangTrong, gopTranscript, locKhucBu, chuanHoaRamp, taoAnhXaThoiGian, doiThoiGianTranscript } = await import('../loi/core.js');
+const { lamSachTranscript, nguongImLang, chonKhungXuat, vungNoiTuImLang, tinhKhoangTrong, gopTranscript, locKhucBu, chuanHoaRamp, taoAnhXaThoiGian, doiThoiGianTranscript, phanTichDungHinh, locImLangTheoDongCu, phanTichDoiCanh, taoAnhXaCat } = await import('../loi/core.js');
 
 test('lamSachTranscript tách đoạn kéo lê qua quãng nhạc, kể cả khi whisper kéo giãn mốc cuối của từ', () => {
   // dữ liệu thật từ video LalaSchool: từ "viên" và "học" bị whisper kéo end qua quãng nhạc
@@ -362,4 +362,24 @@ test('doiThoiGianTranscript áp ánh xạ vào đoạn và từng từ', () => {
   assert.equal(kq.doan[0].batDau, 2);
   assert.equal(kq.doan[0].ketThuc, 7);
   assert.equal(kq.doan[0].tu[0].ketThuc, 3);
+});
+
+test('phanTichDungHinh + locImLangTheoDongCu: im lặng có cử động thì giữ', () => {
+  const dung = phanTichDungHinh('lavfi.freezedetect.freeze_start: 5.0\nlavfi.freezedetect.freeze_end: 9.0\n', 30);
+  assert.deepEqual(dung, [{ batDau: 5, ketThuc: 9 }]);
+  const cat = locImLangTheoDongCu([
+    { batDau: 5.5, ketThuc: 8.5 },   // nằm trọn trong đứng hình → cắt
+    { batDau: 15, ketThuc: 18 },     // im lặng nhưng hình đang động → giữ
+  ], dung);
+  assert.equal(cat.length, 1);
+  assert.equal(cat[0].batDau, 5.5);
+});
+
+test('phanTichDoiCanh + taoAnhXaCat: mốc gốc ánh xạ sang timeline đã cắt', () => {
+  const moc = phanTichDoiCanh('n:1 pts_time:4.2 x\nn:2 pts_time:12.0 x\nn:3 pts_time:12.0 x');
+  assert.deepEqual(moc, [4.2, 12]);
+  const anhXa = taoAnhXaCat([{ batDau: 0, ketThuc: 5 }, { batDau: 10, ketThuc: 20 }]);
+  assert.equal(anhXa(4.2), 4.2);
+  assert.equal(anhXa(7), null);        // mốc rơi vào đoạn bị cắt
+  assert.equal(anhXa(12), 7);          // 5 + (12-10)
 });
