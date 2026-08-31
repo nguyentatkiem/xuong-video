@@ -61,6 +61,13 @@
     "pill",
     "steps",
     "lockup",
-    "counter"
+    "counter",
+    "databar",
+    "datapie"
+  ],
+  "chuyenCanh": [
+    "smoothleft",
+    "circleopen",
+    "fade"
   ]
 }

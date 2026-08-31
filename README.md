@@ -98,3 +98,12 @@ Dữ liệu mỗi lần dựng nằm ở `du-lieu/viec/<id>/` (video gốc, các
 - Cắt theo beat nhạc nền (aubio) + whip-pan có nhoè chuyển động
 - Chuyển renderer sang Remotion cho bảng so sánh/scorecard động ngoài tầm ASS
 - Nhiều worker song song cho hàng đợi
+
+## v4 — FFmpeg nâng cao + engine học Remotion (không license)
+
+- **Speed-ramp giữ khớp tiếng**: đạo diễn trả `ramp[]`, pass1 setpts+atempo từng khúc, mọi mốc phụ đề/đồ hoạ được ánh xạ thời gian theo (`taoAnhXaThoiGian`); `cham: true` bật slow-mo nội suy khung `minterpolate`
+- **Chuyển cảnh xfade** tại ranh giới khung thẻ (style khai `chuyenCanh[]`) — giữ nguyên thời lượng bằng kỹ thuật đóng băng khung cuối rồi quét sang cảnh mới, tiếng không bị đụng
+- **5 module mới** (tổng 23): `waveform` (sóng âm nhảy theo tiếng, peaks bóc bằng ffmpeg), `sticker` (mũi tên/confetti/lấp lánh vẽ canvas), `lottie` (bỏ tệp LottieFiles vào `lottie/`), `databar`/`datapie` (biểu đồ SỐ LIỆU THẬT động); mọi module thêm được `vao3d: true`
+- **Beat-reveal**: style có `beatSync: true` (fast-paced, storytime, review-doc) tự nẹp đồ hoạ vào phách nhạc dò từ sóng âm
+- **Style 14 "Audiogram"** 🌊 cho nội dung thuần tiếng; **loudness 2-pass** đo thật rồi chuẩn tuyến tính
+- Đã cân nhắc MoviePy (bỏ — chậm, trùng năng lực) và Remotion (học kiến trúc; nếu sau này tích hợp thật: miễn phí cá nhân/công ty ≤3 người, tổ chức lớn hơn cần license Automators $0.01/render)

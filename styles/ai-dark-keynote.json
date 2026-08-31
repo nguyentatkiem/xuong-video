@@ -8,7 +8,9 @@
   "khung": "doc-crop",
   "catImLang": true,
   "mucCatMacDinh": "manh",
-  "zoom": { "batTat": false },
+  "zoom": {
+    "batTat": false
+  },
   "phuDe": "dong",
   "tuKhoa": true,
   "mauSac": "khong",
@@ -18,11 +20,51 @@
   "progressBar": true,
   "doHoaHtml": true,
   "khungThe": true,
-  "vongKhung": ["hero", "tall", "hero-low", "mid", "full"],
+  "vongKhung": [
+    "hero",
+    "tall",
+    "hero-low",
+    "mid",
+    "full"
+  ],
   "skin": {
-    "gold": "#F7D33B", "goldBright": "#FFF160", "card": "#1F1C13",
-    "ink": "#0F0E0C", "white": "#F4F2E5",
-    "nen": { "bg": [15, 14, 12], "glowRgb": [150, 132, 40], "grid": 90,
-             "glows": [[0.28, 0.20, 0.55, 74], [0.86, 0.78, 0.45, 40]] }
-  }
+    "gold": "#F7D33B",
+    "goldBright": "#FFF160",
+    "card": "#1F1C13",
+    "ink": "#0F0E0C",
+    "white": "#F4F2E5",
+    "nen": {
+      "bg": [
+        15,
+        14,
+        12
+      ],
+      "glowRgb": [
+        150,
+        132,
+        40
+      ],
+      "grid": 90,
+      "glows": [
+        [
+          0.28,
+          0.2,
+          0.55,
+          74
+        ],
+        [
+          0.86,
+          0.78,
+          0.45,
+          40
+        ]
+      ]
+    }
+  },
+  "chuyenCanh": [
+    "circleopen",
+    "slideleft",
+    "fadeblack",
+    "smoothup"
+  ]
 }

@@ -22,5 +22,6 @@
   ],
   "sfx": false,
   "progressBar": false,
-  "doHoaHtml": false
+  "doHoaHtml": false,
+  "speedRamp": true
 }

@@ -4,12 +4,44 @@
 // Toàn bộ là hàm thuần để test được.
 import { tapTuNoiBat } from './core.js';
 
-/** 18 module đồ hoạ hợp lệ (14 của skill + 4 của Xưởng Video). */
+/** 23 module đồ hoạ hợp lệ (14 của skill + 9 của Xưởng Video, v4 thêm 5). */
 export const DS_MODULE = [
   'tag', 'chips', 'qchips', 'iconrow', 'rows', 'pill', 'flow', 'bigtype',
   'lockup', 'steps', 'chart', 'gridfill', 'myth', 'cta', 'note',
   'counter', 'progress', 'lower3',
+  'waveform', 'sticker', 'lottie', 'databar', 'datapie',
 ];
+
+/**
+ * Dò phách từ mảng biên độ (peaks, hz mẫu/giây): điểm năng lượng bật vọt
+ * so với nền cục bộ và là đỉnh cục bộ → mốc phách cho beat-reveal.
+ */
+export function timPhach(peaks, hz, { toiThieuCach = 0.28 } = {}) {
+  if (!peaks?.length || !hz) return [];
+  const cuaSo = Math.max(2, Math.round(hz * 0.35));
+  const phach = [];
+  let truoc = -10;
+  for (let i = cuaSo; i < peaks.length - 1; i++) {
+    let nen = 0;
+    for (let j = i - cuaSo; j < i; j++) nen += peaks[j];
+    nen /= cuaSo;
+    if (peaks[i] > nen * 1.6 + 0.04 && peaks[i] >= peaks[i - 1] && peaks[i] >= peaks[i + 1]) {
+      const t = i / hz;
+      if (t - truoc >= toiThieuCach) { phach.push(Math.round(t * 100) / 100); truoc = t; }
+    }
+  }
+  return phach.slice(0, 400);
+}
+
+/** Nẹp các module có batTheoNhip vào mốc phách gần nhất phía sau (lệch ≤1s). */
+export function nepTheoPhach(els, phach, { toiDaLech = 1.0 } = {}) {
+  if (!phach?.length) return els;
+  return els.map((e) => {
+    if (!e.batTheoNhip) return e;
+    const p = phach.find((x) => x >= e.t && x - e.t <= toiDaLech);
+    return p ? { ...e, t: p } : e;
+  });
+}
 
 /** Hệ toạ độ thiết kế theo khung xuất (render nhân 1.5 → nét). */
 export const KHONG_GIAN = {

@@ -61,6 +61,12 @@
     "tag",
     "gridfill",
     "counter",
-    "cta"
+    "cta",
+    "databar",
+    "datapie"
+  ],
+  "chuyenCanh": [
+    "slideleft",
+    "fadeblack"
   ]
 }

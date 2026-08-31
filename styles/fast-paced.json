@@ -60,6 +60,10 @@
     "iconrow",
     "tag",
     "counter",
-    "note"
-  ]
+    "note",
+    "sticker",
+    "databar"
+  ],
+  "beatSync": true,
+  "speedRamp": true
 }

@@ -1,0 +1,50 @@
+{
+  "id": "audiogram",
+  "ten": "Audiogram sóng âm",
+  "nhom": "podcast",
+  "bieuTuong": "🌊",
+  "thuTu": 2.5,
+  "moTa": "Cho nội dung thuần tiếng: nền video làm mờ tối, sóng âm nhảy theo giọng nói, tiêu đề tập + phụ đề to — ra clip quảng bá podcast hàng loạt.",
+  "khung": "doc-blur",
+  "catImLang": true,
+  "mucCatMacDinh": "nhe",
+  "zoom": {
+    "batTat": false
+  },
+  "phuDe": "dong",
+  "tuKhoa": true,
+  "mauSac": "toi",
+  "theChuong": false,
+  "loudnorm": true,
+  "sfx": false,
+  "progressBar": true,
+  "doHoaHtml": true,
+  "khungThe": false,
+  "moduleChoPhep": [
+    "waveform",
+    "lockup",
+    "note",
+    "tag",
+    "counter"
+  ],
+  "skin": {
+    "gold": "#F7D33B",
+    "goldBright": "#FFF160",
+    "card": "#1F1C13",
+    "ink": "#0F0E0C",
+    "white": "#F4F2E5",
+    "nen": {
+      "bg": [
+        15,
+        14,
+        12
+      ],
+      "glowRgb": [
+        150,
+        132,
+        40
+      ],
+      "grid": 90
+    }
+  }
+}

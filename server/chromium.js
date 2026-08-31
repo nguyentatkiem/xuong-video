@@ -1,6 +1,7 @@
 // Cầu nối Playwright/Chromium: chụp canvas nền, mặt nạ bo góc,
 // đo bố cục và xuất chuỗi frame PNG trong suốt của lớp đồ hoạ HTML.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { KHONG_GIAN, TI_LE_NET, cssSkin } from '../loi/storyboard.js';
@@ -44,12 +45,19 @@ async function moTrang({ html, tepHtml = null, rong, cao, tiLe = TI_LE_NET }) {
 export async function xayTrangOverlay({ storyboard, skin, khongGian }) {
   const kg = KHONG_GIAN[khongGian];
   const mau = await readFile(TEP_ENGINE, 'utf8');
+  // chỉ tiêm lottie.min.js khi storyboard thật sự dùng module lottie
+  const tepLottie = path.join(GOC, 'node_modules', 'lottie-web', 'build', 'player', 'lottie.min.js');
+  const canLottie = (storyboard.els || []).some((e) => e.module === 'lottie') && existsSync(tepLottie);
+  const story = canLottie
+    ? { ...storyboard, lottieDir: 'file://' + path.join(GOC, 'lottie') }
+    : storyboard;
   return mau
     .replaceAll('__FONT_DIR__', THU_MUC_FONT)
+    .replace('__LOTTIE_TAG__', canLottie ? `<script src="file://${tepLottie}"></script>` : '')
     .replace('__SKIN__', cssSkin(skin, khongGian))
     .replaceAll('__W__', String(kg.rong))
     .replaceAll('__H__', String(kg.cao))
-    .replace('__STORY__', JSON.stringify(storyboard));
+    .replace('__STORY__', JSON.stringify(story));
 }
 
 /** Đo kích thước thật của từng module (cho soi bố cục) — nhanh, 1 lần mở trang. */

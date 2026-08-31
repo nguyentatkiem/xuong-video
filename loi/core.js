@@ -81,7 +81,7 @@ function chuoiKhung(khung) {
  * Luôn dùng đường trim/concat (n=1 vẫn hợp lệ) cho đồng nhất.
  * @returns {{filterComplex:string, mapVideo:string, mapAudio:string}}
  */
-export function xayDoLocPass1({ doanGiu, khung = 'ngang', loudnorm = true }) {
+export function xayDoLocPass1({ doanGiu, khung = 'ngang', loudnorm = true, ramp = null, loudnormThongSo = null }) {
   const phan = [];
   const nhan = [];
   doanGiu.forEach((d, i) => {
@@ -89,7 +89,26 @@ export function xayDoLocPass1({ doanGiu, khung = 'ngang', loudnorm = true }) {
     phan.push(`[0:a]atrim=start=${s3(d.batDau)}:end=${s3(d.ketThuc)},asetpts=PTS-STARTPTS[a${i}]`);
     nhan.push(`[v${i}][a${i}]`);
   });
-  phan.push(`${nhan.join('')}concat=n=${doanGiu.length}:v=1:a=1[vc][ac]`);
+  phan.push(`${nhan.join('')}concat=n=${doanGiu.length}:v=1:a=1[vc0][ac0]`);
+
+  // speed-ramp: đổi tốc độ từng khúc, hình (setpts) và tiếng (atempo) cùng hệ số
+  if (ramp && ramp.some((r) => Math.abs(r.tocDo - 1) > 0.05)) {
+    phan.push(`[vc0]split=${ramp.length}${ramp.map((_, i) => `[sv${i}]`).join('')}`);
+    phan.push(`[ac0]asplit=${ramp.length}${ramp.map((_, i) => `[sa${i}]`).join('')}`);
+    const nhanR = [];
+    ramp.forEach((r, i) => {
+      const locV = [`trim=start=${s3(r.batDau)}:end=${s3(r.ketThuc)}`, 'setpts=PTS-STARTPTS'];
+      if (r.cham && r.tocDo < 0.75) locV.push('minterpolate=fps=60:mi_mode=mci'); // slow-mo mượt
+      locV.push(`setpts=PTS/${r.tocDo.toFixed(4)}`);
+      phan.push(`[sv${i}]${locV.join(',')}[rv${i}]`);
+      phan.push(`[sa${i}]atrim=start=${s3(r.batDau)}:end=${s3(r.ketThuc)},asetpts=PTS-STARTPTS,atempo=${r.tocDo.toFixed(4)}[ra${i}]`);
+      nhanR.push(`[rv${i}][ra${i}]`);
+    });
+    phan.push(`${nhanR.join('')}concat=n=${ramp.length}:v=1:a=1[vc][ac]`);
+  } else {
+    phan.push('[vc0]null[vc]');
+    phan.push('[ac0]anull[ac]');
+  }
 
   if (khung === 'doc-blur') {
     phan.push('[vc]split=2[nen][chinh]');
@@ -99,7 +118,9 @@ export function xayDoLocPass1({ doanGiu, khung = 'ngang', loudnorm = true }) {
   } else {
     phan.push(`[vc]${chuoiKhung(khung)}[vout]`);
   }
-  phan.push(loudnorm ? '[ac]loudnorm=I=-16:TP=-1.5:LRA=11[aout]' : '[ac]anull[aout]');
+  phan.push(loudnorm
+    ? `[ac]loudnorm=I=-16:TP=-1.5:LRA=11${loudnormThongSo ? ':' + loudnormThongSo + ':linear=true' : ''}[aout]`
+    : '[ac]anull[aout]');
 
   return { filterComplex: phan.join(';'), mapVideo: '[vout]', mapAudio: '[aout]' };
 }
@@ -181,6 +202,69 @@ export function xayDoLocPass2({
   phan.push(chuoi.length ? `[vz]${chuoi.join(',')}[vout]` : '[vz]null[vout]');
 
   return { filterComplex: phan.join(';'), mapVideo: '[vout]' };
+}
+
+/** Chuẩn hoá danh sách speed-ramp từ đạo diễn: kẹp 0.5–2.0, đoạn ≥1.5s, không chồng lấn, ≤4. */
+export function chuanHoaRamp(tho, thoiLuong) {
+  const so = (x) => (Number.isFinite(x) ? x : parseFloat(x));
+  const ds = (Array.isArray(tho) ? tho : [])
+    .map((r) => ({
+      batDau: so(r.batDau ?? r.bat_dau), ketThuc: so(r.ketThuc ?? r.ket_thuc),
+      tocDo: Math.min(2, Math.max(0.5, so(r.tocDo ?? r.toc_do) || 1)),
+      cham: r.cham === true,
+    }))
+    .filter((r) => Number.isFinite(r.batDau) && Number.isFinite(r.ketThuc)
+      && r.batDau >= 0 && r.ketThuc <= thoiLuong && r.ketThuc - r.batDau >= 1.5
+      && Math.abs(r.tocDo - 1) > 0.05)
+    .sort((a, b) => a.batDau - b.batDau);
+  const sach = [];
+  for (const r of ds) {
+    if (!sach.length || r.batDau >= sach[sach.length - 1].ketThuc) sach.push(r);
+  }
+  return sach.slice(0, 4);
+}
+
+/**
+ * Ánh xạ thời gian sau speed-ramp: trả {doiT(t), thoiLuongMoi, doan}.
+ * doan = dãy phủ kín [0, thoiLuong] kèm tốc độ từng khúc (để dựng filter).
+ */
+export function taoAnhXaThoiGian(ramp, thoiLuong) {
+  const doan = [];
+  let conTro = 0;
+  for (const r of ramp) {
+    if (r.batDau > conTro + 0.01) doan.push({ batDau: conTro, ketThuc: r.batDau, tocDo: 1 });
+    doan.push({ batDau: r.batDau, ketThuc: r.ketThuc, tocDo: r.tocDo, cham: r.cham });
+    conTro = r.ketThuc;
+  }
+  if (thoiLuong - conTro > 0.01) doan.push({ batDau: conTro, ketThuc: thoiLuong, tocDo: 1 });
+  if (!doan.length) doan.push({ batDau: 0, ketThuc: thoiLuong, tocDo: 1 });
+
+  let cong = 0;
+  for (const d of doan) {
+    d.moiBatDau = cong;
+    cong += (d.ketThuc - d.batDau) / d.tocDo;
+    d.moiKetThuc = cong;
+  }
+  const thoiLuongMoi = cong;
+  const doiT = (t) => {
+    const tt = Math.max(0, Math.min(t, thoiLuong));
+    for (const d of doan) {
+      if (tt <= d.ketThuc + 1e-9) return d.moiBatDau + (tt - d.batDau) / d.tocDo;
+    }
+    return thoiLuongMoi;
+  };
+  return { doiT, thoiLuongMoi, doan };
+}
+
+/** Áp ánh xạ thời gian vào transcript (đoạn + từng từ). */
+export function doiThoiGianTranscript(transcript, doiT) {
+  if (!transcript?.doan) return transcript;
+  return {
+    doan: transcript.doan.map((d) => ({
+      ...d, batDau: doiT(d.batDau), ketThuc: doiT(d.ketThuc),
+      tu: d.tu?.map((t) => ({ ...t, batDau: doiT(t.batDau), ketThuc: doiT(t.ketThuc) })),
+    })),
+  };
 }
 
 /** Giây → mốc thời gian ASS "H:MM:SS.CC". */

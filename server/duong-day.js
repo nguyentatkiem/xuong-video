@@ -12,6 +12,7 @@ import {
   edlDuPhong, trichJson, chuanHoaEdl, ghepMoTaSeo,
   lamSachTranscript, nguongImLang, chonKhungXuat, vungNoiTuImLang,
   tinhKhoangTrong, gopTranscript, locKhucBu,
+  chuanHoaRamp, taoAnhXaThoiGian, doiThoiGianTranscript,
 } from '../loi/core.js';
 import {
   xayDoLocPass2V2, xayLocAmThanh, taoSuKienSfx, canhDuPhong, chuanHoaCanh,
@@ -20,7 +21,7 @@ import {
 import {
   DS_MODULE, KHONG_GIAN, KHUNG_THE, TI_LE_NET, tenKhongGian,
   taoCaption, tinhDoanKhung, khungTheDuPhong, chuanHoaDoHoa,
-  timLoiBoCuc, goPhanTuLoi, suKienSfxV3,
+  timLoiBoCuc, goPhanTuLoi, suKienSfxV3, timPhach, nepTheoPhach,
 } from '../loi/storyboard.js';
 import { coChromium, doDacOverlay, chupOverlay, chupCanvas, chupMask, luuTrangOverlay } from './chromium.js';
 
@@ -119,6 +120,36 @@ async function doDoSang(tep, cwd) {
   const cacGiaTri = [...(kq.err + kq.out).matchAll(/YAVG=([\d.]+)/g)].map((m) => parseFloat(m[1]));
   if (!cacGiaTri.length) return 110;
   return cacGiaTri.reduce((a, b) => a + b, 0) / cacGiaTri.length;
+}
+
+/** Loudness 2-pass: đo thật rồi trả chuỗi thông số cho lượt chuẩn hoá tuyến tính. */
+async function doLoudnorm2Pass(tep, cwd) {
+  const kq = await chayLenh(FFMPEG, [
+    '-hide_banner', '-i', tep,
+    '-af', 'loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json', '-f', 'null', '-',
+  ], { cwd });
+  const j = trichJson(kq.err.slice(kq.err.lastIndexOf('{')));
+  if (!j?.input_i) return null;
+  return `measured_I=${j.input_i}:measured_TP=${j.input_tp}:measured_LRA=${j.input_lra}:measured_thresh=${j.input_thresh}:offset=${j.target_offset}`;
+}
+
+/** Bóc biên độ sóng âm ~30 mẫu/giây (cho module waveform + dò phách). */
+async function docSongAm(tepWav, cwd) {
+  const kq = await new Promise((resolve) => {
+    const tt = spawn(FFMPEG, ['-hide_banner', '-i', tepWav, '-ac', '1', '-ar', '3000', '-f', 's16le', '-'], { cwd });
+    const phan = [];
+    tt.stdout.on('data', (d) => phan.push(d));
+    tt.on('close', () => resolve(Buffer.concat(phan)));
+    tt.on('error', () => resolve(Buffer.alloc(0)));
+  });
+  const buoc = 100; // 3000Hz / 100 mẫu = 30 giá trị/giây
+  const song = [];
+  for (let i = 0; i + buoc * 2 <= kq.length; i += buoc * 2) {
+    let dinh = 0;
+    for (let j = 0; j < buoc; j++) dinh = Math.max(dinh, Math.abs(kq.readInt16LE(i + j * 2)));
+    song.push(Math.round((dinh / 32768) * 1000) / 1000);
+  }
+  return { song, hz: 30 };
 }
 
 async function timWhisper() {
@@ -223,7 +254,8 @@ function taPhanDoHoa(style, khongGian) {
   return `
 ĐỒ HOẠ HTML — toạ độ trong không gian ${kg.rong}×${kg.cao}, x là số px hoặc "center":
 Module được dùng: ${choPhep.join(', ')}.
-Tham số nhanh: tag{text ≤4 từ} · chips/qchips{items ≤4, mỗi mục ≤3 từ} · iconrow{items từ bộ: doc img vid chart clock bolt user shop link check folder phone laptop spark gear} · rows{items ≤5 [{text,icon}], active: chỉ số dòng vàng; cao = n×70−8px} · pill{text,sub} · flow{items ≤3} · bigtype{kicker,big,sub có |vàng|; cao ~200px} · lockup{l1,l2,l3 — dùng đúng 1 lần; cao ~220px} · steps{items ≤4; cao ~85px} · chart{kicker,label; cao ~180px} · gridfill{kicker,unit,total,count; cao ~205px} · myth{text ≤8 từ, strike_at = đúng giây phủ định; dùng ≤1 lần} · cta{text,sub — cuối video} · note{text có |vàng|} · counter{kicker,tu,den,hauTo} · lower3{text,sub}
+Tham số nhanh: tag{text ≤4 từ} · chips/qchips{items ≤4, mỗi mục ≤3 từ} · iconrow{items từ bộ: doc img vid chart clock bolt user shop link check folder phone laptop spark gear} · rows{items ≤5 [{text,icon}], active: chỉ số dòng vàng; cao = n×70−8px} · pill{text,sub} · flow{items ≤3} · bigtype{kicker,big,sub có |vàng|; cao ~200px} · lockup{l1,l2,l3 — dùng đúng 1 lần; cao ~220px} · steps{items ≤4; cao ~85px} · chart{kicker,label; cao ~180px} · gridfill{kicker,unit,total,count; cao ~205px} · myth{text ≤8 từ, strike_at = đúng giây phủ định; dùng ≤1 lần} · cta{text,sub — cuối video} · note{text có |vàng|} · counter{kicker,tu,den,hauTo} · lower3{text,sub} · waveform{h≈120 — sóng âm nhảy theo tiếng} · sticker{kieu: mui-ten|confetti|lap-lanh, co≈160 — dùng khi ăn mừng/chỉ trỏ} · databar{duLieu:[{ten,giaTri}] ≤5, hauTo — CHỈ khi lời nói nêu số liệu so sánh thật; cao ≈ n×30px} · datapie{giaTri 0-100, ten — một tỉ lệ phần trăm được nói ra}
+Mọi module có thể thêm "vao3d": true (lật 3D nhẹ khi hiện) — dùng tiết chế, hợp intro/CTA.
 Khung thẻ video (framing): ${dsPreset}. Đổi khung 5–8s một lần, tại điểm chuyển ý. pan_y 0.30–0.55 (mặc định 0.42, giảm nếu cắt mất trán).
 QUY TẮC VÀNG: mỗi ý nói ra có đúng MỘT phần tử đồ hoạ hiện đúng giây đó (sai số <0.3s); không nghĩ ra khối phù hợp thì ĐỂ TRỐNG — vài giây chỉ có mặt người và phụ đề là nhịp nghỉ tốt. Luôn đặt "out" (cụm sống 6–12s). "stagger" = đúng nhịp liệt kê trong lời nói. CẤM đặt đồ hoạ vào dải phụ đề y ${kg.capDai[0]}–${kg.capDai[1]} và đè lên thẻ video đang hiện.
 Trả THÊM hai trường trong JSON:
@@ -266,8 +298,10 @@ Trả về DUY NHẤT một JSON theo mẫu:
   "tu_khoa": [{"giay": 12.5, "chu": "TỪ KHOÁ <= 3 từ"}],
   "anh": [{"giay": 8, "tep": "ten-tep-trong-thu-vien.jpg", "kieu": "pop", "dai": 3.5}],
   "so_dem": [{"giay": 20, "tu": 0, "den": 347, "hau_to": "%"}],
-  "sua_chu": [{"sai": "sường video", "dung": "Xưởng Video"}]
-}
+  "sua_chu": [{"sai": "sường video", "dung": "Xưởng Video"}]${style.speedRamp === true ? `,
+  "ramp": [{"batDau": 10.0, "ketThuc": 14.0, "tocDo": 1.35}]` : ''}
+}${style.speedRamp === true ? `
+- "ramp": đổi tốc độ đoạn — 1.2–1.5 tua nhanh đoạn dẫn dắt/lặp ý, 0.6–0.8 cho khoảnh khắc đắt (thêm "cham": true nếu muốn slow-mo mượt). Mỗi đoạn ≥2s, tối đa 4 đoạn, KHÔNG ramp đoạn đang nói ý quan trọng.` : ''}
 QUY TẮC:
 - "canh" phải phủ kín [0, ${thoiLuong.toFixed(1)}] liên tục, mỗi cảnh 2–8 giây, ranh giới trùng ranh giới câu nói.
 - dongTac chỉ được chọn từ: ${dongTacChoPhep.join(', ')}. Đổi động tác liên tục, tránh 2 cảnh liền nhau cùng động tác. punch-in cho câu quan trọng, push-in cho dẫn dắt, pan cho liệt kê, rung cho từ khoá mạnh, tinh để nghỉ mắt.
@@ -325,7 +359,7 @@ async function renderKhungHtml({
   if (dungThe) {
     // lượt 1 giữ khung gốc + chuẩn tiếng
     const tepB1 = `buoc1-${hauTo}.mp4`;
-    const p1 = xayDoLocPass1({ doanGiu, khung: 'goc', loudnorm: style.loudnorm !== false });
+    const p1 = xayDoLocPass1({ doanGiu, khung: 'goc', loudnorm: style.loudnorm !== false, ramp: edl.rampDoan, loudnormThongSo: edl.loudnormThongSo });
     await ffmpeg(['-i', tepGoc, '-filter_complex', p1.filterComplex,
       '-map', p1.mapVideo, '-map', p1.mapAudio, '-r', '30',
       '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-c:a', 'aac', '-b:a', '192k', tepB1], thuMuc);
@@ -375,13 +409,39 @@ async function renderKhungHtml({
       dsSeg.push(tenSeg);
       if (ganChiTiet && k % 3 === 2) ganChiTiet(`Dựng thẻ video ${k + 1}/${edl.doanKhung.length}…`);
     }
-    await writeFile(path.join(thuMuc, `noi-${hauTo}.txt`), dsSeg.map((s) => `file '${s}'`).join('\n'));
+    // chuyển cảnh xfade GIỮ NGUYÊN thời lượng: đóng băng khung cuối cảnh trước,
+    // quét (wipe/fade) sang 0.45s đầu của cảnh sau — tiếng không bị đụng
+    let danhSachNoi = [...dsSeg];
+    if (style.chuyenCanh?.length && dsSeg.length > 1) {
+      danhSachNoi = [dsSeg[0]];
+      for (let k = 1; k < dsSeg.length; k++) {
+        const daiSeg = edl.doanKhung[k].ketThuc - edl.doanKhung[k].batDau;
+        if (daiSeg < 1.2) { danhSachNoi.push(dsSeg[k]); continue; }
+        const kieu = style.chuyenCanh[(k - 1) % style.chuyenCanh.length];
+        const dong = `dong-${hauTo}-${k}.png`;
+        await ffmpeg(['-sseof', '-0.05', '-i', dsSeg[k - 1], '-frames:v', '1', dong], thuMuc);
+        const trans = `trans-${hauTo}-${k}.mp4`;
+        await ffmpeg([
+          '-loop', '1', '-t', '0.45', '-i', dong, '-i', dsSeg[k],
+          '-filter_complex',
+          `[0:v]scale=${kichThuoc.rong}:${kichThuoc.cao},setsar=1,fps=30[a];` +
+          `[1:v]trim=0:0.45,setpts=PTS-STARTPTS,fps=30[b];` +
+          `[a][b]xfade=transition=${kieu}:duration=0.45:offset=0,format=yuv420p[v]`,
+          '-map', '[v]', '-r', '30', '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', trans,
+        ], thuMuc);
+        const cut = `segc-${hauTo}-${k}.mp4`;
+        await ffmpeg(['-ss', '0.45', '-i', dsSeg[k], '-an',
+          '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', cut], thuMuc);
+        danhSachNoi.push(trans, cut);
+      }
+    }
+    await writeFile(path.join(thuMuc, `noi-${hauTo}.txt`), danhSachNoi.map((s) => `file '${s}'`).join('\n'));
     tepNen = `nen-${hauTo}.mp4`;
     await ffmpeg(['-f', 'concat', '-safe', '0', '-i', `noi-${hauTo}.txt`, '-c', 'copy', tepNen], thuMuc);
   } else {
     // toàn khung: dùng đường camera ảo hiện có làm nền (không chữ, không trộn tiếng)
     const tepB1 = `buoc1-${hauTo}.mp4`;
-    const p1 = xayDoLocPass1({ doanGiu, khung, loudnorm: style.loudnorm !== false });
+    const p1 = xayDoLocPass1({ doanGiu, khung, loudnorm: style.loudnorm !== false, ramp: edl.rampDoan, loudnormThongSo: edl.loudnormThongSo });
     await ffmpeg(['-i', tepGoc, '-filter_complex', p1.filterComplex,
       '-map', p1.mapVideo, '-map', p1.mapAudio, '-r', '30',
       '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-c:a', 'aac', '-b:a', '192k', tepB1], thuMuc);
@@ -400,7 +460,10 @@ async function renderKhungHtml({
 
   // ── Lớp đồ hoạ + phụ đề HTML ────────────────────────────────────────
   if (ganChiTiet) ganChiTiet(`Chụp lớp đồ hoạ qua Chromium (~${Math.round(sau.thoiLuong * 30)} khung)…`);
-  const storyboard = { els: edl.els, caps: edl.caps, dur: sau.thoiLuong };
+  const storyboard = {
+    els: edl.els, caps: edl.caps, dur: sau.thoiLuong,
+    song: edl.song, hzSong: edl.hzSong, phach: edl.phach,
+  };
   await luuTrangOverlay({ storyboard, skin: style.skin || {}, khongGian, thuMuc });
   const overlay = await chupOverlay({ storyboard, skin: style.skin || {}, khongGian, thuMuc });
 
@@ -472,7 +535,7 @@ async function renderKhung({
 
   // Lượt 1: cắt + khung + chuẩn tiếng
   const tepB1 = `buoc1-${hauTo}.mp4`;
-  const p1 = xayDoLocPass1({ doanGiu, khung, loudnorm: style.loudnorm !== false });
+  const p1 = xayDoLocPass1({ doanGiu, khung, loudnorm: style.loudnorm !== false, ramp: edl.rampDoan, loudnormThongSo: edl.loudnormThongSo });
   await ffmpeg([
     '-i', tepGoc, '-filter_complex', p1.filterComplex,
     '-map', p1.mapVideo, '-map', p1.mapAudio,
@@ -703,7 +766,7 @@ export async function chayViec(viec, ganBuoc) {
           matDo: style.zoom?.matDo || 'vua', dongTacChoPhep, moc: mocCau,
         }),
         anh: v2.anh, suaChu: v2.suaChu, soDem: v2.soDem,
-        doHoaTho: tho.do_hoa, framingTho: tho.framing,
+        doHoaTho: tho.do_hoa, framingTho: tho.framing, rampTho: tho.ramp,
       };
     } else {
       edl = {
@@ -728,6 +791,32 @@ export async function chayViec(viec, ganBuoc) {
     edl.tuKhoa = edl.tuKhoa.filter((tk) => tk.giay > 4.6);
   }
   transcript = apSuaChu(transcript, edl.suaChu);
+
+  // ── Speed-ramp: đổi nhịp video/tiếng rồi ÁNH XẠ mọi mốc thời gian theo ──
+  edl.ramp = style.speedRamp === true ? chuanHoaRamp(edl.rampTho, sauCat.thoiLuong) : [];
+  edl.rampDoan = null;
+  if (edl.ramp.length) {
+    const ax = taoAnhXaThoiGian(edl.ramp, sauCat.thoiLuong);
+    const doiT = ax.doiT;
+    edl.rampDoan = ax.doan;
+    transcript = doiThoiGianTranscript(transcript, doiT);
+    edl.tuKhoa = edl.tuKhoa.map((t) => ({ ...t, giay: doiT(t.giay) }));
+    edl.chuong = edl.chuong.map((c) => ({ ...c, giay: doiT(c.giay) }));
+    edl.soDem = (edl.soDem || []).map((s) => ({ ...s, giay: doiT(s.giay) }));
+    edl.anh = (edl.anh || []).map((a) => ({ ...a, giay: doiT(a.giay) }));
+    edl.canh = edl.canh.map((c) => ({ ...c, batDau: doiT(c.batDau), ketThuc: doiT(c.ketThuc) }));
+    edl.doHoaTho = (edl.doHoaTho || []).map((e) => ({
+      ...e, t: doiT(Number(e.t)),
+      out: e.out != null ? doiT(Number(e.out)) : e.out,
+      strike_at: e.strike_at != null ? doiT(Number(e.strike_at)) : e.strike_at,
+    }));
+    edl.framingTho = (edl.framingTho || []).map((f) => ({ ...f, t: doiT(Number(f.t)) }));
+    sauCat.thoiLuong = ax.thoiLuongMoi;
+    baoCao.thoiLuongSauCat = ax.thoiLuongMoi;
+    baoCao.soRamp = edl.ramp.length;
+  }
+  // loudness 2-pass: đo thật một lần, các lượt render chuẩn theo số đo
+  edl.loudnormThongSo = style.loudnorm !== false ? await doLoudnorm2Pass(tepGoc, thuMuc) : null;
 
   // gán đường dẫn thật cho ảnh: thư viện kênh trước, Pexels sau (nếu có key)
   const anhThat = [];
@@ -754,6 +843,22 @@ export async function chayViec(viec, ganBuoc) {
     edl.caps = transcript ? taoCaption(transcript, { tuKhoa: edl.tuKhoa }) : [];
     if (style.progressBar !== false && sauCat.thoiLuong > 20) {
       edl.els.push({ module: 'progress', t: 0, y: KHONG_GIAN[khongGian].cao - 7, x: 0 });
+    }
+    // sóng âm + phách (bỏ khi có ramp — peaks đo trên nhịp thời gian cũ sẽ lệch)
+    const canSong = style.beatSync
+      || (style.moduleChoPhep || DS_MODULE).includes('waveform')
+      || edl.els.some((e) => e.module === 'waveform');
+    if (!edl.ramp.length && canSong && existsSync(path.join(thuMuc, 'tieng.wav'))) {
+      try {
+        const sa = await docSongAm('tieng.wav', thuMuc);
+        edl.song = sa.song; edl.hzSong = sa.hz;
+      } catch { /* thiếu sóng âm không chặn */ }
+    }
+    if (style.beatSync && edl.song) {
+      edl.phach = timPhach(edl.song, edl.hzSong);
+      edl.els = nepTheoPhach(
+        edl.els.map((e) => (e.module === 'progress' ? e : { ...e, batTheoNhip: e.batTheoNhip !== false })),
+        edl.phach);
     }
   }
 

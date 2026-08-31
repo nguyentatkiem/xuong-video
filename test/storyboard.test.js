@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   DS_MODULE, KHONG_GIAN, taoCaption, tinhDoanKhung, khungTheDuPhong,
-  chuanHoaDoHoa, timLoiBoCuc, goPhanTuLoi, suKienSfxV3, cssSkin, tenKhongGian,
+  chuanHoaDoHoa, timLoiBoCuc, goPhanTuLoi, suKienSfxV3, cssSkin, tenKhongGian, timPhach, nepTheoPhach,
 } from '../loi/storyboard.js';
 
 const transcript = { doan: [{
@@ -112,5 +112,18 @@ test('cssSkin sinh token màu + caption theo không gian; tenKhongGian ánh xạ
   assert.ok(css.includes(`--cap-size:${KHONG_GIAN.ngang.capSize}px;`));
   assert.equal(tenKhongGian('doc-blur'), 'doc');
   assert.equal(tenKhongGian('vuong'), 'vuong');
-  assert.equal(DS_MODULE.length, 18);
+  assert.equal(DS_MODULE.length, 23);
+});
+
+test('timPhach bắt điểm năng lượng vọt, nepTheoPhach chỉ nẹp module đánh dấu', () => {
+  const hz = 30;
+  const peaks = Array.from({ length: 300 }, (_, i) => (i % 60 === 45 ? 0.9 : 0.1));
+  const phach = timPhach(peaks, hz);
+  assert.ok(phach.length >= 4, 'phải bắt được các cú vọt: ' + phach.length);
+  const els = nepTheoPhach([
+    { module: 'tag', t: 1.2, batTheoNhip: true },
+    { module: 'note', t: 1.2 },
+  ], phach);
+  assert.ok(Math.abs(els[0].t - 1.5) < 0.07, 'tag nẹp vào phách 1.5s: ' + els[0].t);
+  assert.equal(els[1].t, 1.2, 'note không đánh dấu thì giữ nguyên');
 });

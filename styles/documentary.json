@@ -59,6 +59,11 @@
     "chart",
     "note",
     "tag",
-    "counter"
+    "counter",
+    "databar"
+  ],
+  "chuyenCanh": [
+    "fadeblack",
+    "dissolve"
   ]
 }

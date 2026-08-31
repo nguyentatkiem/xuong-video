@@ -60,6 +60,9 @@
     "tag",
     "note",
     "bigtype",
-    "cta"
-  ]
+    "cta",
+    "sticker"
+  ],
+  "beatSync": true,
+  "speedRamp": true
 }

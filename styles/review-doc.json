@@ -55,6 +55,9 @@
     "gridfill",
     "tag",
     "bigtype",
-    "counter"
-  ]
+    "counter",
+    "datapie",
+    "sticker"
+  ],
+  "beatSync": true
 }

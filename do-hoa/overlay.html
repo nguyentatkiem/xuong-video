@@ -124,6 +124,15 @@ body{font-family:BVP,sans-serif;-webkit-font-smoothing:antialiased}
 .lower3 .l3a{color:var(--white);font-weight:800;font-size:27px}
 .lower3 .l3b{color:var(--gold-bright);font-weight:500;font-size:17px;letter-spacing:.06em;text-transform:uppercase}
 
+.dbar{display:flex;flex-direction:column;gap:10px}
+.dbr{display:flex;align-items:center;gap:12px}
+.dbn{color:var(--white);font-weight:600;font-size:19px;min-width:132px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dbt{flex:1;height:18px;border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden}
+.dbt i{display:block;height:100%;width:0;border-radius:9px;background:var(--gold);box-shadow:0 0 14px color-mix(in srgb, var(--gold) 50%, transparent)}
+.dbv{color:var(--gold);font-weight:800;font-size:19px;min-width:52px;text-align:right}
+.dpie{display:flex;align-items:center;gap:16px}
+.dpv b{display:block;color:var(--gold);font-weight:800;font-size:44px;line-height:1}
+.dpv span{color:var(--white);font-weight:600;font-size:18px;opacity:.85}
 #cap{position:absolute;left:0;right:0;bottom:var(--cap-bottom);display:flex;justify-content:center;opacity:0}
 #cap .plate{max-width:var(--cap-max);padding:12px 26px;border-radius:16px;background:rgba(9,9,12,.60);
   color:var(--white);font-weight:700;font-size:var(--cap-size);line-height:1.24;text-align:center;
@@ -131,6 +140,7 @@ body{font-family:BVP,sans-serif;-webkit-font-smoothing:antialiased}
 #cap b{color:var(--gold);font-weight:700}
 </style></head>
 <body>
+__LOTTIE_TAG__
 <script>window.STORY = __STORY__;</script>
 <div id="stage"></div><div id="cap"><div class="plate"></div></div>
 <script>
@@ -194,6 +204,24 @@ function build(e){
         d.style.width='100%'; d.style.left='0'; d._cx=false;
         h = `<div class="progress" style="top:0"><i></i></div>`; break;
    case 'lower3':h = `<div class="lower3"><span class="l3a">${esc(p.text)}</span>${p.sub?`<span class="l3b">${esc(p.sub)}</span>`:''}</div>`; break;
+   case 'waveform':
+        h = `<canvas class="wv" width="${(p.w===undefined||p.w==='auto')?584:p.w}" height="${p.h||120}" style="width:100%;height:${p.h||120}px"></canvas>`; break;
+   case 'sticker':
+        h = `<canvas class="stk" width="${p.co||160}" height="${p.co||160}" style="width:${p.co||160}px;height:${p.co||160}px"></canvas>`; break;
+   case 'lottie':
+        d.style.height = (p.cao||200)+'px';
+        h = `<div class="ltt" data-tep="${esc(p.tep||'')}" style="width:100%;height:100%"></div>`; break;
+   case 'databar':
+        h = `<div class="dbar">${(p.duLieu||[]).slice(0,5).map(r=>{
+          const it=(typeof r==='string')?{ten:r,giaTri:50}:r;
+          return `<div class="dbr"><span class="dbn">${esc(it.ten)}</span><span class="dbt"><i data-v="${Number(it.giaTri)||0}"></i></span><b class="dbv">0</b></div>`;
+        }).join('')}</div>`; break;
+   case 'datapie':
+        h = `<div class="dpie"><svg viewBox="0 0 120 120" style="width:${p.co||170}px;height:${p.co||170}px">
+          <circle cx="60" cy="60" r="50" fill="none" stroke="rgba(255,255,255,.09)" stroke-width="13"/>
+          <circle class="dpr" cx="60" cy="60" r="50" fill="none" stroke="var(--gold)" stroke-width="13"
+            stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="314" stroke-dashoffset="314"/>
+          </svg><div class="dpv"><b>0%</b>${p.ten?`<span>${esc(p.ten)}</span>`:''}</div></div>`; break;
    default:      h = `<div class="note">${hl(p.text||'')}</div>`;
   }
   d.innerHTML = h;
@@ -205,6 +233,21 @@ function build(e){
 const els = (S.els||[]).map(build);
 const caps = (S.caps||[]).map(c=>({t:c.t, e:c.t+(c.d||1.0), html:hl(c.text)}));
 
+// nạp lottie (nếu template được tiêm lottie.min.js và có module lottie)
+if(window.lottie){
+  for(const n of els){
+    if(n._e.module!=='lottie') continue;
+    const tep = n.querySelector('.ltt').dataset.tep;
+    if(!tep) continue;
+    try{
+      n._lt = window.lottie.loadAnimation({
+        container: n.querySelector('.ltt'), renderer: 'svg',
+        loop: false, autoplay: false, path: (S.lottieDir||'') + '/' + tep,
+      });
+    }catch(err){ /* thiếu tệp thì module trống, không chặn render */ }
+  }
+}
+
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const easeOut = x => 1-Math.pow(1-x,3);
 
@@ -213,11 +256,12 @@ function anim(node, t){
   const tin = e.t, tout = (e.out===undefined? 1e9 : e.out);
   const IN = e.dur_in===undefined?0.30:e.dur_in, OUT=0.22;
   if(t < tin-0.001 || t > tout+OUT){ node.style.opacity=0; return; }
-  let a=1, dy=0;
-  if(t < tin+IN){ const k=easeOut(clamp((t-tin)/IN,0,1)); a=k; dy=(1-k)*16; }
+  let a=1, dy=0, kIn=1;
+  if(t < tin+IN){ kIn=easeOut(clamp((t-tin)/IN,0,1)); a=kIn; dy=(1-kIn)*16; }
   else if(t > tout){ const k=clamp((t-tout)/OUT,0,1); a=1-k; dy=-k*8; }
   node.style.opacity = a;
-  node.style.transform = (node._cx?'translateX(-50%) ':'')+`translateY(${dy.toFixed(2)}px)`;
+  const xoay3d = e.vao3d ? ` perspective(900px) rotateY(${((1-kIn)*40).toFixed(2)}deg)` : '';
+  node.style.transform = (node._cx?'translateX(-50%) ':'')+`translateY(${dy.toFixed(2)}px)`+xoay3d;
 
   const stg = node._stg, sg = e.stagger===undefined?0.55:e.stagger;
   if(stg.length){
@@ -252,6 +296,75 @@ function anim(node, t){
     const m = node.querySelector('.myth'), s = node.querySelector('.strike');
     s.style.width = (k*(m.offsetWidth-32))+'px';
     m.classList.toggle('dead', k>0.9);
+  }
+  if(e.module==='waveform'){
+    const cv = node.querySelector('.wv'), ctx = cv.getContext('2d');
+    const song = S.song||[], hz = S.hzSong||30, soCot = 44;
+    ctx.clearRect(0,0,cv.width,cv.height);
+    const mau = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim()||'#F7D33B';
+    ctx.fillStyle = mau;
+    const bw = cv.width/soCot, giua = cv.height/2;
+    for(let c=0;c<soCot;c++){
+      const idx = Math.round((t - (soCot-1-c)*0.045)*hz);
+      const v = (idx>=0 && idx<song.length)? song[idx] : 0;
+      const hh = Math.max(3, v*giua*1.9);
+      ctx.beginPath();
+      ctx.roundRect(c*bw+bw*0.18, giua-hh/2, bw*0.64, hh, bw*0.3);
+      ctx.fill();
+    }
+  }
+  if(e.module==='sticker'){
+    const cv = node.querySelector('.stk'), ctx = cv.getContext('2d');
+    const mau = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim()||'#F7D33B';
+    const tl = t - tin, W = cv.width, H = cv.height;
+    ctx.clearRect(0,0,W,H);
+    if(e.kieu==='confetti'){
+      for(let i=0;i<26;i++){
+        const ph = Math.sin(i*12.9898)*43758.5453, r1 = ph-Math.floor(ph);
+        const r2v = Math.sin(i*78.233)*12345.678, r2 = r2v-Math.floor(r2v);
+        const y = ((tl*(40+r1*60)+r2*H)%(H+20))-10, x = (r1*W + Math.sin(tl*2+i)*14+W)%W;
+        ctx.fillStyle = i%3? mau : '#fff';
+        ctx.save(); ctx.translate(x,y); ctx.rotate(tl*3+i);
+        ctx.fillRect(-4,-2,8,4); ctx.restore();
+      }
+    } else if(e.kieu==='lap-lanh'){
+      for(let i=0;i<7;i++){
+        const ph=Math.sin(i*91.7)*1000, r=ph-Math.floor(ph);
+        const nhap = Math.max(0, Math.sin(tl*2.4+i*1.9));
+        const x=r*W, y=((i*0.37)%1)*H, s=(5+r*7)*nhap;
+        ctx.strokeStyle=mau; ctx.lineWidth=2.4; ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(x-s,y); ctx.lineTo(x+s,y);
+        ctx.moveTo(x,y-s); ctx.lineTo(x,y+s); ctx.stroke();
+      }
+    } else { // mui-ten: mũi tên nhún xuống
+      const nhun = Math.abs(Math.sin(tl*3.1))*H*0.16;
+      ctx.strokeStyle=mau; ctx.lineWidth=W*0.09; ctx.lineCap='round'; ctx.lineJoin='round';
+      const cx=W/2, y1=H*0.16+nhun, y2=H*0.62+nhun;
+      ctx.beginPath(); ctx.moveTo(cx,y1); ctx.lineTo(cx,y2);
+      ctx.moveTo(cx-W*0.2,y2-H*0.18); ctx.lineTo(cx,y2); ctx.lineTo(cx+W*0.2,y2-H*0.18);
+      ctx.stroke();
+    }
+  }
+  if(e.module==='databar'){
+    const k = easeOut(clamp((t-tin-0.15)/(e.draw||1.3),0,1));
+    const rows = node.querySelectorAll('.dbr');
+    let max = 1; rows.forEach(r=>{ max = Math.max(max, +r.querySelector('i').dataset.v); });
+    rows.forEach((r,i)=>{
+      const kk = easeOut(clamp((t-tin-0.15-i*(e.stagger===undefined?0.3:e.stagger))/(e.draw||1.3),0,1));
+      const v = +r.querySelector('i').dataset.v;
+      r.querySelector('i').style.width = (kk*v/max*100).toFixed(1)+'%';
+      r.querySelector('.dbv').textContent = Math.round(kk*v)+(e.hauTo||'');
+    });
+  }
+  if(e.module==='datapie'){
+    const k = easeOut(clamp((t-tin-0.15)/(e.draw||1.4),0,1));
+    const v = Math.min(100, Math.max(0, e.giaTri===undefined?75:e.giaTri));
+    node.querySelector('.dpr').style.strokeDashoffset = 314*(1-k*v/100);
+    node.querySelector('.dpv b').textContent = Math.round(k*v)+'%';
+  }
+  if(e.module==='lottie' && node._lt){
+    const fr = Math.max(0, (t-tin))*node._lt.frameRate;
+    node._lt.goToAndStop(fr % Math.max(1,node._lt.totalFrames), true);
   }
 }
 

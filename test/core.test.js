@@ -214,7 +214,7 @@ test('s3 và kichThuocKhung', () => {
 });
 
 // ── Vá lỗi từ video thật (31/08) ──────────────────────────────────────
-const { lamSachTranscript, nguongImLang, chonKhungXuat, vungNoiTuImLang, tinhKhoangTrong, gopTranscript, locKhucBu } = await import('../loi/core.js');
+const { lamSachTranscript, nguongImLang, chonKhungXuat, vungNoiTuImLang, tinhKhoangTrong, gopTranscript, locKhucBu, chuanHoaRamp, taoAnhXaThoiGian, doiThoiGianTranscript } = await import('../loi/core.js');
 
 test('lamSachTranscript tách đoạn kéo lê qua quãng nhạc, kể cả khi whisper kéo giãn mốc cuối của từ', () => {
   // dữ liệu thật từ video LalaSchool: từ "viên" và "học" bị whisper kéo end qua quãng nhạc
@@ -323,4 +323,43 @@ test('locKhucBu bỏ ảo giác lặp câu đã có và 1-từ cực ngắn, gi�
     { batDau: 30.1, ketThuc: 30.9, chu: 'bạn nhé' },                          // 2 từ → giữ
   ]);
   assert.deepEqual(bu.map((d) => d.chu), ['Điều thứ hai, xây dựng hệ thống nội dung', 'bạn nhé']);
+});
+
+test('chuanHoaRamp kẹp tốc độ, loại chồng lấn/quá ngắn, tối đa 4', () => {
+  const ds = chuanHoaRamp([
+    { batDau: 2, ketThuc: 6, tocDo: 1.4 },
+    { batDau: 5, ketThuc: 9, tocDo: 1.3 },   // chồng lấn → loại
+    { batDau: 10, ketThuc: 10.8, tocDo: 2 }, // <1.5s → loại
+    { batDau: 12, ketThuc: 15, tocDo: 5 },   // kẹp về 2
+    { batDau: 16, ketThuc: 19, tocDo: 0.98 },// ~1 → loại
+  ], 30);
+  assert.equal(ds.length, 2);
+  assert.equal(ds[1].tocDo, 2);
+});
+
+test('taoAnhXaThoiGian đổi mốc đúng và tính thời lượng mới', () => {
+  const ramp = chuanHoaRamp([{ batDau: 10, ketThuc: 20, tocDo: 2 }], 30);
+  const { doiT, thoiLuongMoi, doan } = taoAnhXaThoiGian(ramp, 30);
+  assert.equal(thoiLuongMoi, 25);            // 10 + 10/2 + 10
+  assert.equal(doiT(5), 5);                  // trước ramp giữ nguyên
+  assert.equal(doiT(15), 12.5);              // giữa ramp co lại
+  assert.equal(doiT(25), 20);                // sau ramp dịch về trước 5s
+  assert.equal(doan.length, 3);
+  assert.ok(Math.abs(doan[2].moiKetThuc - 25) < 1e-9);
+});
+
+test('xayDoLocPass1 với ramp có split + atempo + minterpolate khi cham', () => {
+  const ramp = taoAnhXaThoiGian(chuanHoaRamp([{ batDau: 2, ketThuc: 5, tocDo: 0.6, cham: true }], 10), 10).doan;
+  const { filterComplex } = xayDoLocPass1({ doanGiu: [{ batDau: 0, ketThuc: 10 }], khung: 'ngang', ramp });
+  assert.ok(filterComplex.includes('atempo=0.6000'));
+  assert.ok(filterComplex.includes('minterpolate'));
+  assert.ok(filterComplex.includes('split='));
+});
+
+test('doiThoiGianTranscript áp ánh xạ vào đoạn và từng từ', () => {
+  const { doiT } = taoAnhXaThoiGian(chuanHoaRamp([{ batDau: 0, ketThuc: 10, tocDo: 2 }], 20), 20);
+  const kq = doiThoiGianTranscript({ doan: [{ batDau: 4, ketThuc: 12, chu: 'a', tu: [{ batDau: 4, ketThuc: 6, chu: 'a' }] }] }, doiT);
+  assert.equal(kq.doan[0].batDau, 2);
+  assert.equal(kq.doan[0].ketThuc, 7);
+  assert.equal(kq.doan[0].tu[0].ketThuc, 3);
 });

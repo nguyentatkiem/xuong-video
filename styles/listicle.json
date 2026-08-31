@@ -62,6 +62,11 @@
     "pill",
     "counter",
     "cta",
-    "progress"
+    "progress",
+    "databar"
+  ],
+  "chuyenCanh": [
+    "slideup",
+    "circleopen"
   ]
 }
