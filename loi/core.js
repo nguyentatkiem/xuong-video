@@ -225,6 +225,78 @@ const DINH_DANG_SU_KIEN = `
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `;
 
+/**
+ * Làm sạch transcript whisper trên video thật — whisper hay trả 2 loại rác:
+ * (1) đoạn kéo dài qua cả quãng nhạc/im lặng dù lời đã dứt từ lâu;
+ * (2) cả câu bị nhồi mốc thời gian vào <1 giây (thường ở cuối tệp).
+ * Cách xử lý: tin MỐC TỪNG TỪ, tách đoạn tại khoảng nghỉ giữa từ, và dàn đều
+ * lại các cụm từ suy biến (thời lượng trung bình mỗi từ < 0.12s) lùi từ cuối.
+ */
+export function lamSachTranscript(transcript, thoiLuong, { khoangTach = 1.1, daiTu = 0.38 } = {}) {
+  if (!transcript?.doan?.length) return transcript;
+  const doanMoi = [];
+
+  const ghiDoan = (nhom) => {
+    if (!nhom.length) return;
+    let batDau = nhom[0].batDau;
+    let ketThuc = Math.min(nhom[nhom.length - 1].ketThuc + 0.15, thoiLuong);
+    const truoc = doanMoi[doanMoi.length - 1];
+    if (truoc && batDau < truoc.ketThuc) {
+      batDau = Math.min(truoc.ketThuc + 0.05, ketThuc - 0.2);
+      const buoc = (ketThuc - batDau) / nhom.length;
+      nhom = nhom.map((t, i) => ({ ...t, batDau: batDau + i * buoc, ketThuc: batDau + (i + 1) * buoc - 0.03 }));
+    }
+    doanMoi.push({ batDau, ketThuc, chu: nhom.map((t) => t.chu).join(' '), tu: nhom });
+  };
+
+  for (const d of transcript.doan) {
+    if (!d.tu || !d.tu.length) { doanMoi.push({ ...d, ketThuc: Math.min(d.ketThuc, thoiLuong) }); continue; }
+    let tu = d.tu
+      .map((t) => ({ ...t, batDau: Math.max(0, Math.min(t.batDau, thoiLuong)), ketThuc: Math.max(0, Math.min(t.ketThuc, thoiLuong)) }))
+      .map((t) => (t.ketThuc > t.batDau ? t : { ...t, ketThuc: t.batDau + 0.05 }))
+      // whisper hay kéo giãn mốc kết thúc của từ qua cả quãng nhạc → kẹp 1s/từ
+      .map((t) => ({ ...t, ketThuc: Math.min(t.ketThuc, t.batDau + 1.0) }));
+
+    // cụm suy biến → dàn đều lùi từ mốc cuối
+    const bề = tu[tu.length - 1].ketThuc - tu[0].batDau;
+    if (bề / tu.length < 0.12) {
+      const cuoi = Math.min(Math.max(tu[tu.length - 1].ketThuc, 0.5), thoiLuong);
+      const dau = Math.max(0, cuoi - daiTu * tu.length);
+      tu = tu.map((t, i) => ({ ...t, batDau: dau + i * daiTu, ketThuc: dau + (i + 1) * daiTu - 0.04 }));
+    }
+
+    // tách đoạn tại khoảng nghỉ dài giữa từ
+    let nhom = [tu[0]];
+    for (let i = 1; i < tu.length; i++) {
+      if (tu[i].batDau - nhom[nhom.length - 1].ketThuc > khoangTach) { ghiDoan(nhom); nhom = []; }
+      nhom.push(tu[i]);
+    }
+    ghiDoan(nhom);
+  }
+  return { doan: doanMoi };
+}
+
+/**
+ * Ngưỡng im lặng THÍCH ỨNG theo âm lượng trung bình của video (volumedetect).
+ * Video có nhạc nền/tiếng ồn → mean cao → ngưỡng cao theo, không bắt hụt;
+ * video thu phòng yên tĩnh → mean thấp → ngưỡng hạ theo, không cắt oan.
+ */
+export function nguongImLang(meanVolumeDb, muc = 'vua') {
+  const lech = { nhe: 14, vua: 10, manh: 7 }[muc] ?? 10;
+  const nguong = Math.max(-60, Math.min(-20, meanVolumeDb - lech));
+  return `${nguong.toFixed(1)}dB`;
+}
+
+/**
+ * Chọn khung xuất: người dùng ép thì theo người dùng; còn "tự động" thì
+ * video gốc DỌC không bao giờ bị ép sang khung ngang (giữ doc-crop).
+ */
+export function chonKhungXuat(style, gocDoc, yeuCau = 'auto') {
+  if (yeuCau && yeuCau !== 'auto') return yeuCau;
+  if (gocDoc && style.khung === 'ngang') return 'doc-crop';
+  return style.khung;
+}
+
 /** Tách các từ khoá thành tập từ đơn (thường, bỏ dấu câu) để tô nổi trong phụ đề. */
 export function tapTuNoiBat(tuKhoa) {
   const tap = new Set();
@@ -260,8 +332,10 @@ export function taoAssPhuDe(transcript, {
     const nhomTu = chuKieu.nhomTu || 4;
     const mauDaDoc = chuKieu.mauDaDoc || '&H0000E9FF';
     const mauChoDoc = chuKieu.mauChoDoc || '&H00FFFFFF';
-    const canGiua = (chuKieu.viTri || 'giua') === 'giua';
-    const style = `Style: PhuDe,${font},${co},${mauDaDoc},${mauChoDoc},&H00101010,&H96000000,-1,0,0,0,100,100,0,0,1,5,2,${canGiua ? 5 : 2},60,60,${canGiua ? 0 : (doc ? 260 : 80)},1\n`;
+    // mặc định đặt DƯỚI CẰM (talking-head dọc mặt chiếm gần hết khung) — 'giua' phải xin rõ
+    const canGiua = chuKieu.viTri === 'giua';
+    const marginV = canGiua ? 0 : Math.round(cao * (doc ? 0.35 : 0.22));
+    const style = `Style: PhuDe,${font},${co},${mauDaDoc},${mauChoDoc},&H00101010,&H96000000,-1,0,0,0,100,100,0,0,1,5,2,${canGiua ? 5 : 2},60,60,${marginV},1\n`;
     for (const d of transcript.doan) {
       const tu = d.tu && d.tu.length ? d.tu : null;
       if (tu) {
@@ -324,7 +398,7 @@ export function taoAssDoHoa({ rong, cao, thoiLuong, tieuDe = '', tenKenh = '', t
   const doc = cao > rong;
   const styles = [
     `Style: TieuDe,Arial,${doc ? 72 : 60},&H00FFFFFF,&H00FFFFFF,&H00202020,&H8C000000,-1,0,0,0,100,100,0,0,1,4,2,8,60,60,${doc ? 180 : 70},1`,
-    `Style: TuKhoa,Arial,${doc ? 110 : 92},&H00FFFFFF,&H00FFFFFF,${mauAccent},&H96000000,-1,0,0,0,100,100,2,0,1,6,3,8,40,40,${Math.round(cao * 0.24)},1`,
+    `Style: TuKhoa,Arial,${doc ? 100 : 78},&H00FFFFFF,&H00FFFFFF,${mauAccent},&H96000000,-1,0,0,0,100,100,2,0,1,6,3,2,40,40,${Math.round(cao * (doc ? 0.46 : 0.38))},1`,
     `Style: Chuong,Arial,${doc ? 78 : 66},&H00FFFFFF,&H00FFFFFF,${mauAccent},${mauAccent},-1,0,0,0,100,100,1,0,3,14,0,5,60,60,0,1`,
     `Style: Kenh,Arial,${doc ? 40 : 34},&H5AFFFFFF,&H5AFFFFFF,&H5A101010,&H96000000,0,0,0,0,100,100,0,0,1,2,0,3,40,40,${doc ? 60 : 40},1`,
     `Style: Bar,Arial,20,${mauAccent},${mauAccent},${mauAccent},${mauAccent},0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1`,

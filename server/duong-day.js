@@ -10,6 +10,7 @@ import {
   phanTichImLang, tinhDoanGiu, xayDoLocPass1, chuoiMau,
   kichThuocKhung, taoAssPhuDe, taoAssDoHoa, taoSrt, tapTuNoiBat,
   edlDuPhong, trichJson, chuanHoaEdl, ghepMoTaSeo,
+  lamSachTranscript, nguongImLang, chonKhungXuat,
 } from '../loi/core.js';
 import {
   xayDoLocPass2V2, xayLocAmThanh, taoSuKienSfx, canhDuPhong, chuanHoaCanh,
@@ -86,10 +87,20 @@ async function doThongTin(tep, cwd) {
   const audio = (j.streams || []).find((s) => s.codec_type === 'audio');
   if (!video) throw new Error('Tệp không có luồng hình.');
   if (!audio) throw new Error('Tệp không có luồng tiếng — pipeline hiện cần video có âm thanh.');
+  // video điện thoại hay lưu ngang + cờ xoay 90° — phải xét cờ mới biết hướng thật
+  const xoay = Math.abs((video.side_data_list || []).find((sd) => sd.rotation !== undefined)?.rotation || 0);
+  const [rongHien, caoHien] = xoay % 180 === 90 ? [video.height, video.width] : [video.width, video.height];
   return {
     thoiLuong: parseFloat(j.format?.duration || video.duration || 0),
-    rong: video.width, cao: video.height,
+    rong: rongHien, cao: caoHien, doc: caoHien > rongHien,
   };
+}
+
+/** Âm lượng trung bình (dB) — nền cho ngưỡng cắt im lặng thích ứng. */
+async function doAmLuong(tep, cwd) {
+  const kq = await chayLenh(FFMPEG, ['-hide_banner', '-i', tep, '-af', 'volumedetect', '-f', 'null', '-'], { cwd });
+  const m = (kq.err + kq.out).match(/mean_volume:\s*(-?[\d.]+)\s*dB/);
+  return m ? parseFloat(m[1]) : -30;
 }
 
 /** Độ sáng trung bình (YAVG 0-255) của video — để chọn màu chữ không bị chìm. */
@@ -374,28 +385,34 @@ export async function chayViec(viec, ganBuoc) {
   const { thuMuc, tepGoc, style, tuyChon } = viec;
   const baoCao = { style: style.id };
 
-  // ── 1. Thông tin ─────────────────────────────────────────────────────
+  // ── 1. Thông tin + chọn khung xuất ──────────────────────────────────
   ganBuoc('thongtin', 'dang');
   const goc = await doThongTin(tepGoc, thuMuc);
   baoCao.thoiLuongGoc = goc.thoiLuong;
-  ganBuoc('thongtin', 'xong', `${goc.rong}×${goc.cao}, ${goc.thoiLuong.toFixed(1)}s`);
+  const khungChinh = chonKhungXuat(style, goc.doc, tuyChon.khungXuat || 'auto');
+  baoCao.khung = khungChinh;
+  ganBuoc('thongtin', 'xong', `${goc.rong}×${goc.cao}${goc.doc ? ' (dọc)' : ''}, ${goc.thoiLuong.toFixed(1)}s`
+    + (khungChinh !== style.khung ? ` → giữ khung ${khungChinh} thay vì ${style.khung} của style` : ''));
 
-  // ── 2. Dò khoảng lặng (tính doanGiu — dùng chung cho mọi khung) ─────
+  // ── 2. Dò khoảng lặng — ngưỡng thích ứng theo âm lượng video ────────
   ganBuoc('catlang', 'dang');
   const mucCat = tuyChon.mucCat && tuyChon.mucCat !== 'tat' && style.catImLang !== false
     ? MUC_CAT[tuyChon.mucCat] || MUC_CAT.vua : null;
   let doanGiu = [{ batDau: 0, ketThuc: goc.thoiLuong }];
   let tongCat = 0;
+  let nguong = null;
   if (mucCat) {
+    const amLuong = await doAmLuong(tepGoc, thuMuc);
+    nguong = nguongImLang(amLuong, tuyChon.mucCat);
     const kq = await chayLenh(FFMPEG, [
       '-hide_banner', '-i', tepGoc,
-      '-af', `silencedetect=noise=${mucCat.noise}:d=${mucCat.d}`, '-f', 'null', '-',
+      '-af', `silencedetect=noise=${nguong}:d=${mucCat.d}`, '-f', 'null', '-',
     ], { cwd: thuMuc });
     const imLang = phanTichImLang(kq.err, goc.thoiLuong);
     ({ doanGiu, tongCat } = tinhDoanGiu(imLang, goc.thoiLuong, mucCat));
   }
   // dựng nhanh bản đã-cắt tạm để whisper + đạo diễn làm việc trên timeline cuối
-  const p1tam = xayDoLocPass1({ doanGiu, khung: style.khung, loudnorm: false });
+  const p1tam = xayDoLocPass1({ doanGiu, khung: khungChinh, loudnorm: false });
   await ffmpeg([
     '-i', tepGoc, '-filter_complex', p1tam.filterComplex,
     '-map', p1tam.mapVideo, '-map', p1tam.mapAudio,
@@ -407,7 +424,7 @@ export async function chayViec(viec, ganBuoc) {
   baoCao.soDoanCat = mucCat ? Math.max(0, doanGiu.length - 1) : 0;
   baoCao.giayDaCat = tongCat;
   ganBuoc('catlang', 'xong', mucCat
-    ? `Cắt ${tongCat.toFixed(1)}s im lặng (${baoCao.soDoanCat} chỗ), còn ${sauCat.thoiLuong.toFixed(1)}s`
+    ? `Cắt ${tongCat.toFixed(1)}s im lặng (${baoCao.soDoanCat} chỗ, ngưỡng ${nguong}), còn ${sauCat.thoiLuong.toFixed(1)}s`
     : 'Không cắt im lặng (theo tuỳ chọn/style)');
 
   // ── 3. Transcript ────────────────────────────────────────────────────
@@ -428,6 +445,7 @@ export async function chayViec(viec, ganBuoc) {
       });
       if (kq.ma === 0 && existsSync(path.join(thuMuc, 'tieng.json'))) {
         transcript = docTranscriptWhisper(JSON.parse(await readFile(path.join(thuMuc, 'tieng.json'), 'utf8')));
+        transcript = lamSachTranscript(transcript, sauCat.thoiLuong);
       }
     } catch { /* thiếu transcript không chặn pipeline */ }
   }
@@ -479,6 +497,10 @@ export async function chayViec(viec, ganBuoc) {
   if (style.zoom?.batTat === false) {
     edl.canh = edl.canh.map((c) => ({ ...c, dongTac: 'tinh' }));
   }
+  // tiêu đề chiếm vùng trên trong ~4.5s đầu → từ khoá (cùng vùng) phải né
+  if (style.chuTieuDe !== false && (tuyChon.tieuDe || edl.tieuDe[0])) {
+    edl.tuKhoa = edl.tuKhoa.filter((tk) => tk.giay > 4.6);
+  }
   transcript = apSuaChu(transcript, edl.suaChu);
 
   // gán đường dẫn thật cho ảnh: thư viện kênh trước, Pexels sau (nếu có key)
@@ -507,7 +529,7 @@ export async function chayViec(viec, ganBuoc) {
   ganBuoc('render', 'dang');
   const nenSang = (await doDoSang('nhap.mp4', thuMuc)) > 170;
   const kq = await renderKhung({
-    thuMuc, tepGoc, khung: style.khung, doanGiu, style, edl, transcript, tuyChon,
+    thuMuc, tepGoc, khung: khungChinh, doanGiu, style, edl, transcript, tuyChon,
     tenRa: 'ra.mp4', nenSang,
   });
   baoCao.kichThuoc = kq.kichThuoc;
@@ -528,7 +550,7 @@ export async function chayViec(viec, ganBuoc) {
         edl.canh = edl.canh.map((c, i) => (i % 2 ? { ...c, dongTac: 'tinh' } : c));
       }
       await renderKhung({
-        thuMuc, tepGoc, khung: style.khung, doanGiu, style, edl, transcript, tuyChon,
+        thuMuc, tepGoc, khung: khungChinh, doanGiu, style, edl, transcript, tuyChon,
         tenRa: 'ra.mp4', nenSang,
       });
       ganBuoc('tusoat', 'xong', `Đạo diễn yêu cầu sửa và đã render lại — ${ketSoat.ghi_chu || ''}`);
@@ -543,7 +565,7 @@ export async function chayViec(viec, ganBuoc) {
   // ── 7. Xuất thêm khung ──────────────────────────────────────────────
   ganBuoc('khungthem', 'dang');
   const TEN_KHUNG = { ngang: 'ra-ngang.mp4', 'doc-crop': 'ra-doc.mp4', 'doc-blur': 'ra-doc.mp4', vuong: 'ra-vuong.mp4' };
-  const themKhung = (tuyChon.xuatThem || []).filter((k) => TEN_KHUNG[k] && k !== style.khung);
+  const themKhung = (tuyChon.xuatThem || []).filter((k) => TEN_KHUNG[k] && k !== khungChinh);
   baoCao.khungThem = [];
   for (const k of themKhung) {
     try {

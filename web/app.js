@@ -103,6 +103,7 @@ $('nut-chay').addEventListener('click', () => {
   duLieu.append('tieuDe', $('o-tieu-de').value);
   duLieu.append('tenKenh', $('o-ten-kenh').value);
   duLieu.append('mucCat', $('o-muc-cat').value);
+  duLieu.append('khungXuat', $('o-khung-xuat').value);
 
   const tinhChinh = {};
   if ($('o-mat-do').value) tinhChinh.matDo = $('o-mat-do').value;
