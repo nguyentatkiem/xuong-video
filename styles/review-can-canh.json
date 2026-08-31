@@ -26,5 +26,41 @@
     "tinh"
   ],
   "sfx": true,
-  "progressBar": false
+  "progressBar": false,
+  "doHoaHtml": true,
+  "khungThe": true,
+  "vongKhung": [
+    "hero-left",
+    "hero-right",
+    "full"
+  ],
+  "skin": {
+    "gold": "#FF6B35",
+    "goldBright": "#FFA173",
+    "card": "#231411",
+    "ink": "#0E0907",
+    "white": "#F7EFE9",
+    "nen": {
+      "bg": [
+        14,
+        9,
+        7
+      ],
+      "glowRgb": [
+        150,
+        60,
+        30
+      ],
+      "grid": 90
+    }
+  },
+  "moduleChoPhep": [
+    "rows",
+    "pill",
+    "chart",
+    "tag",
+    "gridfill",
+    "counter",
+    "cta"
+  ]
 }

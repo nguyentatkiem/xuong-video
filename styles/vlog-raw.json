@@ -21,5 +21,6 @@
     "punch-in"
   ],
   "sfx": false,
-  "progressBar": false
+  "progressBar": false,
+  "doHoaHtml": false
 }

@@ -23,8 +23,9 @@ const CAC_BUOC = [
   { id: 'thongtin', ten: 'Đọc thông tin video' },
   { id: 'catlang', ten: 'Cắt khoảng lặng' },
   { id: 'transcript', ten: 'Bóc transcript (whisper)' },
-  { id: 'daodien', ten: 'Đạo diễn AI xem hình + chia cảnh (claude)' },
-  { id: 'render', ten: 'Render camera ảo + chữ + SFX' },
+  { id: 'daodien', ten: 'Đạo diễn AI xem hình + viết storyboard (claude)' },
+  { id: 'bocuc', ten: 'Soi bố cục đồ hoạ (đo bằng Chromium)' },
+  { id: 'render', ten: 'Render khung thẻ + đồ hoạ + chữ + SFX' },
   { id: 'tusoat', ten: 'Đạo diễn tự soát bản dựng' },
   { id: 'khungthem', ten: 'Xuất thêm khung hình' },
   { id: 'xuatban', ten: 'Xuất gói SEO + phụ đề' },
@@ -101,6 +102,8 @@ app.post('/api/viec', upload.single('video'), (req, res) => {
     if (['tu', 'dong', 'khong'].includes(tc.phuDe)) styleDung.phuDe = tc.phuDe;
     if (typeof tc.sfx === 'boolean') styleDung.sfx = tc.sfx;
     if (typeof tc.tuKhoa === 'boolean') styleDung.tuKhoa = tc.tuKhoa;
+    if (tc.doHoa === 'ass') styleDung.doHoaHtml = false;
+    if (tc.doHoa === 'html') styleDung.doHoaHtml = true;
   } catch { /* tinh chỉnh hỏng → dùng preset gốc */ }
 
   const xuatThem = String(req.body.xuatThem || '')

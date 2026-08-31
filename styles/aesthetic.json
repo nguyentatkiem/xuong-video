@@ -26,5 +26,45 @@
   "chuKieu": {
     "co": 40,
     "viTri": "duoi"
-  }
+  },
+  "doHoaHtml": true,
+  "khungThe": false,
+  "skin": {
+    "gold": "#B08D4C",
+    "goldBright": "#D9B87A",
+    "card": "#F4EEE2",
+    "ink": "#FAF6ED",
+    "white": "#3A3226",
+    "line": "rgba(120,96,50,.22)",
+    "nen": {
+      "bg": [
+        250,
+        246,
+        237
+      ],
+      "glowRgb": [
+        214,
+        190,
+        140
+      ],
+      "grid": 0,
+      "glows": [
+        [
+          0.25,
+          0.2,
+          0.5,
+          40
+        ],
+        [
+          0.85,
+          0.8,
+          0.4,
+          26
+        ]
+      ]
+    }
+  },
+  "moduleChoPhep": [
+    "note"
+  ]
 }

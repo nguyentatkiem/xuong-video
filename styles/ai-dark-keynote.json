@@ -1,0 +1,28 @@
+{
+  "id": "ai-dark-keynote",
+  "ten": "AI Dark Keynote",
+  "nhom": "dadung",
+  "bieuTuong": "🌒",
+  "thuTu": 0,
+  "moTa": "Phong cách học từ video mẫu: nền đen ấm lưới mờ + quầng vàng, mặt người trong thẻ bo góc đổi khung liên tục, phụ đề 1 giây/dòng bôi vàng từ khoá, đồ hoạ giao diện dựng dần theo lời nói — chuẩn video bán khoá học/đào tạo.",
+  "khung": "doc-crop",
+  "catImLang": true,
+  "mucCatMacDinh": "manh",
+  "zoom": { "batTat": false },
+  "phuDe": "dong",
+  "tuKhoa": true,
+  "mauSac": "khong",
+  "theChuong": false,
+  "loudnorm": true,
+  "sfx": true,
+  "progressBar": true,
+  "doHoaHtml": true,
+  "khungThe": true,
+  "vongKhung": ["hero", "tall", "hero-low", "mid", "full"],
+  "skin": {
+    "gold": "#F7D33B", "goldBright": "#FFF160", "card": "#1F1C13",
+    "ink": "#0F0E0C", "white": "#F4F2E5",
+    "nen": { "bg": [15, 14, 12], "glowRgb": [150, 132, 40], "grid": 90,
+             "glows": [[0.28, 0.20, 0.55, 74], [0.86, 0.78, 0.45, 40]] }
+  }
+}

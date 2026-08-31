@@ -16,6 +16,12 @@ import {
   xayDoLocPass2V2, xayLocAmThanh, taoSuKienSfx, canhDuPhong, chuanHoaCanh,
   suKienChuongDong, suKienProgressBar, suKienCounter, suKienCta, CAC_DONG_TAC,
 } from '../loi/dong-tac.js';
+import {
+  DS_MODULE, KHONG_GIAN, KHUNG_THE, TI_LE_NET, tenKhongGian,
+  taoCaption, tinhDoanKhung, khungTheDuPhong, chuanHoaDoHoa,
+  timLoiBoCuc, goPhanTuLoi, suKienSfxV3,
+} from '../loi/storyboard.js';
+import { coChromium, doDacOverlay, chupOverlay, chupCanvas, chupMask, luuTrangOverlay } from './chromium.js';
 
 const GOC = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
 
@@ -200,8 +206,32 @@ async function goiClaude(prompt, { coMat = false, gioiHanGiay = 300 } = {}) {
   return kq.out;
 }
 
-/** Đạo diễn v2: transcript + khung hình + manifest media → EDL đầy đủ. */
-async function goiDaoDien({ transcript, style, thoiLuong, tuyChon, tenTep, khungMau, manifest }) {
+/** Mô tả thư viện module + khung thẻ cho prompt đạo diễn (chế độ đồ hoạ HTML). */
+function taPhanDoHoa(style, khongGian) {
+  const kg = KHONG_GIAN[khongGian];
+  const bang = KHUNG_THE[khongGian];
+  const choPhep = style.moduleChoPhep?.length ? style.moduleChoPhep : DS_MODULE;
+  const CHO_TRONG = {
+    doc: { full: 'nổi trên video', hero: 'y 680–1000', 'hero-low': 'y 24–320', tall: 'y 24–140', 'tall-low': 'y 24–290', mid: 'y 24–420 và 910–1000', 'mini-left': 'y 24–550', 'mini-center': 'y 24–550', 'mini-right': 'y 24–550' },
+    ngang: { full: 'nổi trên video', 'hero-left': 'x 660–1232 (y 40–540)', 'hero-right': 'x 48–620 (y 40–540)', mid: 'hai cột x 24–420 và 860–1256' },
+    vuong: { full: 'nổi trên video', hero: 'y 480–640' },
+  }[khongGian];
+  const dsPreset = (style.vongKhung?.length ? style.vongKhung : Object.keys(bang))
+    .filter((p) => bang[p]).map((p) => `${p} (chỗ trống ${CHO_TRONG[p] || '?'})`).join(', ');
+
+  return `
+ĐỒ HOẠ HTML — toạ độ trong không gian ${kg.rong}×${kg.cao}, x là số px hoặc "center":
+Module được dùng: ${choPhep.join(', ')}.
+Tham số nhanh: tag{text ≤4 từ} · chips/qchips{items ≤4, mỗi mục ≤3 từ} · iconrow{items từ bộ: doc img vid chart clock bolt user shop link check folder phone laptop spark gear} · rows{items ≤5 [{text,icon}], active: chỉ số dòng vàng; cao = n×70−8px} · pill{text,sub} · flow{items ≤3} · bigtype{kicker,big,sub có |vàng|; cao ~200px} · lockup{l1,l2,l3 — dùng đúng 1 lần; cao ~220px} · steps{items ≤4; cao ~85px} · chart{kicker,label; cao ~180px} · gridfill{kicker,unit,total,count; cao ~205px} · myth{text ≤8 từ, strike_at = đúng giây phủ định; dùng ≤1 lần} · cta{text,sub — cuối video} · note{text có |vàng|} · counter{kicker,tu,den,hauTo} · lower3{text,sub}
+Khung thẻ video (framing): ${dsPreset}. Đổi khung 5–8s một lần, tại điểm chuyển ý. pan_y 0.30–0.55 (mặc định 0.42, giảm nếu cắt mất trán).
+QUY TẮC VÀNG: mỗi ý nói ra có đúng MỘT phần tử đồ hoạ hiện đúng giây đó (sai số <0.3s); không nghĩ ra khối phù hợp thì ĐỂ TRỐNG — vài giây chỉ có mặt người và phụ đề là nhịp nghỉ tốt. Luôn đặt "out" (cụm sống 6–12s). "stagger" = đúng nhịp liệt kê trong lời nói. CẤM đặt đồ hoạ vào dải phụ đề y ${kg.capDai[0]}–${kg.capDai[1]} và đè lên thẻ video đang hiện.
+Trả THÊM hai trường trong JSON:
+"framing": [{"t": 0, "preset": "hero", "pan_y": 0.42}],
+"do_hoa": [{"module": "rows", "t": 12.0, "out": 20.0, "x": ${kg.le}, "y": 700, "w": ${kg.rongNoiDung}, "stagger": 1.0, "items": [{"text": "…", "icon": "doc"}]}]`;
+}
+
+/** Đạo diễn v2/v3: transcript + khung hình + manifest media → EDL đầy đủ. */
+async function goiDaoDien({ transcript, style, thoiLuong, tuyChon, tenTep, khungMau, manifest, cheDoHtml = false, khongGian = 'doc' }) {
   if (process.env.XUONG_BO_QUA_CLAUDE === '1') return null;
 
   const dongTacChoPhep = style.dongTacChoPhep?.length ? style.dongTacChoPhep : CAC_DONG_TAC;
@@ -219,10 +249,11 @@ async function goiDaoDien({ transcript, style, thoiLuong, tuyChon, tenTep, khung
     ? `\nTHƯ VIỆN MEDIA CỦA KÊNH (chỉ được dùng đúng các tệp này trong "anh"):\n${manifest.map((m) => `- ${m.tep}: ${m.moTa}`).join('\n')}`
     : '\n(Kênh chưa có thư viện media — "anh" để mảng rỗng.)';
 
+  const phanDoHoa = cheDoHtml ? taPhanDoHoa(style, khongGian) : '';
   const prompt = `Bạn là đạo diễn dựng video chuyên nghiệp. Video dài ${thoiLuong.toFixed(1)} giây, tên tệp gốc "${tenTep}".
 Style edit: ${style.ten} — ${style.moTa}
 Tiêu đề người dùng đặt (có thể trống): "${tuyChon.tieuDe || ''}". Tên kênh: "${tuyChon.tenKenh || ''}".
-${phanTranscript}${phanMat}${phanMedia}
+${phanTranscript}${phanMat}${phanMedia}${phanDoHoa}
 
 Trả về DUY NHẤT một JSON theo mẫu:
 {
@@ -273,6 +304,160 @@ Chấm nhanh và trả về DUY NHẤT một JSON:
 }
 
 const SFX_CO_SAN = ['whoosh', 'pop', 'ding', 'tick', 'riser'];
+
+/**
+ * Render chế độ ĐỒ HOẠ HTML: video lồng thẻ bo góc trên canvas (hoặc toàn khung
+ * có camera ảo) + lớp module/phụ đề chụp qua Chromium + tiêu đề/watermark ASS + SFX.
+ */
+async function renderKhungHtml({
+  thuMuc, tepGoc, khung, doanGiu, style, edl, transcript, tuyChon, tenRa, ganChiTiet,
+}) {
+  const khongGian = tenKhongGian(khung);
+  const kg = KHONG_GIAN[khongGian];
+  const kichThuoc = { rong: Math.round(kg.rong * TI_LE_NET), cao: Math.round(kg.cao * TI_LE_NET) };
+  const hauTo = tenRa.replace('.mp4', '');
+  const dungThe = style.khungThe && edl.doanKhung.some((f) => f.preset !== 'full');
+
+  // ── Video nền ────────────────────────────────────────────────────────
+  let tepNen; // video-only hoặc kèm tiếng
+  let tepTieng; // nguồn âm thanh giọng nói
+  if (dungThe) {
+    // lượt 1 giữ khung gốc + chuẩn tiếng
+    const tepB1 = `buoc1-${hauTo}.mp4`;
+    const p1 = xayDoLocPass1({ doanGiu, khung: 'goc', loudnorm: style.loudnorm !== false });
+    await ffmpeg(['-i', tepGoc, '-filter_complex', p1.filterComplex,
+      '-map', p1.mapVideo, '-map', p1.mapAudio, '-r', '30',
+      '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-c:a', 'aac', '-b:a', '192k', tepB1], thuMuc);
+    tepTieng = tepB1;
+
+    // canvas nền + mặt nạ bo góc theo từng hình khối thẻ
+    await chupCanvas({ skin: style.skin || {}, khongGian, thuMuc, ten: `canvas-${hauTo}.png` });
+    const mau = chuoiMau(style.mauSac || 'khong');
+    // kích thước điểm ảnh phải CHẴN: crop yuv420 tự hạ chiều lẻ xuống 1px làm lệch với mặt nạ
+    const chan = (v) => 2 * Math.round((v * TI_LE_NET) / 2);
+    const dsMask = new Map();
+    for (const f of edl.doanKhung) {
+      const [, , w, h, r] = f.the;
+      const khoa = `${w}x${h}r${r}`;
+      if (!dsMask.has(khoa)) {
+        const ten = `mask-${hauTo}-${dsMask.size}.png`;
+        await chupMask({
+          rongThe: chan(w), caoThe: chan(h), boGoc: Math.round(r * TI_LE_NET), thuMuc, ten,
+        });
+        dsMask.set(khoa, ten);
+      }
+    }
+    // dựng từng đoạn thẻ rồi nối
+    const dsSeg = [];
+    for (let k = 0; k < edl.doanKhung.length; k++) {
+      const f = edl.doanKhung[k];
+      const [x, y, w, h, r] = f.the;
+      const W2 = chan(w), H2 = chan(h);
+      const sw = 2 * Math.round((W2 * f.zoom) / 2), sh = 2 * Math.round((H2 * f.zoom) / 2);
+      const dai = f.ketThuc - f.batDau;
+      const tenSeg = `seg-${hauTo}-${k}.mp4`;
+      const locVideo = [
+        `scale=${sw}:${sh}:force_original_aspect_ratio=increase`,
+        `crop=${W2}:${H2}:x=(iw-${W2})/2:y=(ih-${H2})*${f.panY.toFixed(2)}`,
+        ...(mau ? [mau] : []), 'setsar=1',
+      ].join(',');
+      await ffmpeg([
+        '-loop', '1', '-i', `canvas-${hauTo}.png`,
+        '-ss', String(f.batDau.toFixed(3)), '-t', String(dai.toFixed(3)), '-i', tepB1,
+        '-loop', '1', '-i', dsMask.get(`${w}x${h}r${r}`),
+        '-filter_complex',
+        `[1:v]${locVideo}[cv];[2:v]format=gray[mk];[cv][mk]alphamerge[cm];` +
+        `[0:v][cm]overlay=${Math.round(x * TI_LE_NET)}:${Math.round(y * TI_LE_NET)},format=yuv420p[v]`,
+        '-map', '[v]', '-t', String(dai.toFixed(3)), '-r', '30', '-an',
+        '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', tenSeg,
+      ], thuMuc);
+      dsSeg.push(tenSeg);
+      if (ganChiTiet && k % 3 === 2) ganChiTiet(`Dựng thẻ video ${k + 1}/${edl.doanKhung.length}…`);
+    }
+    await writeFile(path.join(thuMuc, `noi-${hauTo}.txt`), dsSeg.map((s) => `file '${s}'`).join('\n'));
+    tepNen = `nen-${hauTo}.mp4`;
+    await ffmpeg(['-f', 'concat', '-safe', '0', '-i', `noi-${hauTo}.txt`, '-c', 'copy', tepNen], thuMuc);
+  } else {
+    // toàn khung: dùng đường camera ảo hiện có làm nền (không chữ, không trộn tiếng)
+    const tepB1 = `buoc1-${hauTo}.mp4`;
+    const p1 = xayDoLocPass1({ doanGiu, khung, loudnorm: style.loudnorm !== false });
+    await ffmpeg(['-i', tepGoc, '-filter_complex', p1.filterComplex,
+      '-map', p1.mapVideo, '-map', p1.mapAudio, '-r', '30',
+      '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-c:a', 'aac', '-b:a', '192k', tepB1], thuMuc);
+    tepTieng = tepB1;
+    const thoiLuongNen = (await doThongTin(tepB1, thuMuc)).thoiLuong;
+    const p2 = xayDoLocPass2V2({
+      thoiLuong: thoiLuongNen, canh: edl.canh, kichThuoc,
+      mauSac: style.mauSac || 'khong', chuoiMauFn: chuoiMau,
+      flashGiay: [], anh: [], tepPhuDe: null, tepDoHoa: null, fade: false,
+    });
+    tepNen = `nen-${hauTo}.mp4`;
+    await ffmpeg(['-i', tepB1, '-filter_complex', p2.filterComplex,
+      '-map', p2.mapVideo, '-an', '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', tepNen], thuMuc);
+  }
+  const sau = await doThongTin(tepTieng, thuMuc);
+
+  // ── Lớp đồ hoạ + phụ đề HTML ────────────────────────────────────────
+  if (ganChiTiet) ganChiTiet(`Chụp lớp đồ hoạ qua Chromium (~${Math.round(sau.thoiLuong * 30)} khung)…`);
+  const storyboard = { els: edl.els, caps: edl.caps, dur: sau.thoiLuong };
+  await luuTrangOverlay({ storyboard, skin: style.skin || {}, khongGian, thuMuc });
+  const overlay = await chupOverlay({ storyboard, skin: style.skin || {}, khongGian, thuMuc });
+
+  // tiêu đề + watermark vẫn đi lớp ASS (đã canh theo độ phân giải thật)
+  let tepAss = null;
+  if (CO_LIBASS) {
+    tepAss = `do-hoa-${hauTo}.ass`;
+    await writeFile(path.join(thuMuc, tepAss), taoAssDoHoa({
+      ...kichThuoc, thoiLuong: sau.thoiLuong,
+      tieuDe: style.chuTieuDe !== false ? (tuyChon.tieuDe || edl.tieuDe[0] || '') : '',
+      tenKenh: style.watermark !== false ? (tuyChon.tenKenh || '') : '',
+      tuKhoa: [], chuong: [], suKienThem: [],
+    }));
+  }
+
+  // ── Âm thanh + ghép cuối ────────────────────────────────────────────
+  const suKienSfx = style.sfx !== false ? suKienSfxV3({ doanKhung: dungThe ? edl.doanKhung : [], els: edl.els }) : [];
+  const tepNhac = style.nhacMood
+    ? [`${style.nhacMood}.mp3`, `${style.nhacMood}.wav`, `${style.nhacMood}.m4a`]
+        .map((t) => path.join(GOC, 'nhac', t)).find((t) => existsSync(t)) || null
+    : null;
+  const inputs = ['-i', tepNen];
+  inputs.push('-framerate', '30', '-i', path.join('overlay-frames', '%05d.png'));
+  inputs.push('-i', tepTieng);
+  const viTriSfx = {};
+  let viTri = 3;
+  for (const ten of SFX_CO_SAN) {
+    if (!suKienSfx.some((sk) => sk.sfx === ten)) continue;
+    const tep = path.join(GOC, 'sfx', `${ten}.wav`);
+    if (!existsSync(tep)) continue;
+    inputs.push('-i', tep);
+    viTriSfx[ten] = viTri++;
+  }
+  let viTriNhac = null;
+  if (tepNhac) { inputs.push('-i', tepNhac); viTriNhac = viTri++; }
+
+  const amThanh = xayLocAmThanh({
+    suKien: suKienSfx, viTriSfx, viTriNhac, thoiLuong: sau.thoiLuong, nhanGiong: '2:a',
+  });
+  const chuoiCuoi = [
+    ...(tepAss ? [`ass=${tepAss}`] : []),
+    'fade=t=in:d=0.4', `fade=t=out:st=${Math.max(0, sau.thoiLuong - 0.45).toFixed(3)}:d=0.45`,
+  ].join(',');
+  const filter = `[0:v][1:v]overlay=0:0:shortest=1[vo];[vo]${chuoiCuoi}[vout]`
+    + (amThanh ? `;${amThanh.filterAudio}` : '');
+  await ffmpeg([
+    ...inputs, '-filter_complex', filter,
+    '-map', '[vout]',
+    ...(amThanh ? ['-map', amThanh.mapAudio] : ['-map', '2:a']),
+    '-c:a', 'aac', '-b:a', '192k',
+    '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '19', '-movflags', '+faststart',
+    tenRa,
+  ], thuMuc);
+  return {
+    thoiLuong: sau.thoiLuong, kichThuoc, soSfx: suKienSfx.length,
+    coNhac: Boolean(tepNhac), soFrameOverlay: overlay?.soFrame || 0,
+  };
+}
 
 /**
  * Render một khung hình (pass1 + pass2) — dùng lại cho khung chính và khung phụ.
@@ -457,6 +642,8 @@ export async function chayViec(viec, ganBuoc) {
 
   // ── 4. Đạo diễn có mắt ──────────────────────────────────────────────
   ganBuoc('daodien', 'dang');
+  const khongGian = tenKhongGian(khungChinh);
+  const cheDoHtml = Boolean(style.doHoaHtml) && await coChromium();
   const manifest = await docManifestAsync();
   const khungMau = process.env.XUONG_DAO_DIEN_MAT !== '0'
     ? await trichKhungMau('nhap.mp4', thuMuc, sauCat.thoiLuong) : [];
@@ -468,6 +655,7 @@ export async function chayViec(viec, ganBuoc) {
     const tho = await goiDaoDien({
       transcript, style, thoiLuong: sauCat.thoiLuong, tuyChon,
       tenTep: viec.tenTepGoc || path.basename(tepGoc), khungMau, manifest,
+      cheDoHtml, khongGian,
     });
     if (tho) {
       const v1 = chuanHoaEdl(tho, sauCat.thoiLuong, style);
@@ -478,6 +666,7 @@ export async function chayViec(viec, ganBuoc) {
           matDo: style.zoom?.matDo || 'vua', dongTacChoPhep, moc: mocCau,
         }),
         anh: v2.anh, suaChu: v2.suaChu, soDem: v2.soDem,
+        doHoaTho: tho.do_hoa, framingTho: tho.framing,
       };
     } else {
       edl = {
@@ -516,22 +705,83 @@ export async function chayViec(viec, ganBuoc) {
   }
   edl.anh = anhThat;
 
+  // Chế độ HTML: dựng storyboard (module + framing + caption theo nhịp)
+  if (cheDoHtml) {
+    edl.els = chuanHoaDoHoa(edl.doHoaTho, sauCat.thoiLuong, {
+      khongGian, choPhep: style.moduleChoPhep?.length ? style.moduleChoPhep : null,
+    });
+    edl.doanKhung = tinhDoanKhung(
+      (edl.framingTho?.length ? edl.framingTho : khungTheDuPhong(sauCat.thoiLuong, {
+        khongGian, moc: mocCau, vong: style.vongKhung,
+      })), sauCat.thoiLuong, khongGian);
+    edl.caps = transcript ? taoCaption(transcript, { tuKhoa: edl.tuKhoa }) : [];
+    if (style.progressBar !== false && sauCat.thoiLuong > 20) {
+      edl.els.push({ module: 'progress', t: 0, y: KHONG_GIAN[khongGian].cao - 7, x: 0 });
+    }
+  }
+
   const soDongTac = new Set(edl.canh.map((c) => c.dongTac)).size;
   baoCao.daoDien = edl.nguon;
-  baoCao.soCanh = edl.canh.length;
+  baoCao.soCanh = cheDoHtml && style.khungThe ? edl.doanKhung.length : edl.canh.length;
   baoCao.soTuKhoa = edl.tuKhoa.length;
   baoCao.soAnh = edl.anh.length;
+  baoCao.cheDoDoHoa = cheDoHtml ? 'html' : 'ass';
+  baoCao.soModule = edl.els?.length || 0;
   ganBuoc('daodien', 'xong', edl.nguon === 'claude'
-    ? `Claude${khungMau.length ? ' (đã xem ' + khungMau.length + ' khung hình)' : ''}: ${edl.canh.length} cảnh/${soDongTac} động tác, ${edl.tuKhoa.length} từ khoá, ${edl.chuong.length} chương, ${edl.anh.length} ảnh, ${edl.suaChu.length} sửa chữ`
+    ? `Claude${khungMau.length ? ' (đã xem ' + khungMau.length + ' khung hình)' : ''}: ${cheDoHtml ? `${edl.doanKhung?.length || 0} khung thẻ, ${edl.els.length} module đồ hoạ, ` : `${edl.canh.length} cảnh/${soDongTac} động tác, `}${edl.tuKhoa.length} từ khoá, ${edl.chuong.length} chương, ${edl.anh.length} ảnh, ${edl.suaChu.length} sửa chữ`
     : `Nhịp dự phòng: ${edl.canh.length} cảnh/${soDongTac} động tác${edl.loiClaude ? ' — claude lỗi: ' + edl.loiClaude : ''}`);
+
+  // ── 4b. Soi bố cục (chỉ chế độ HTML) ────────────────────────────────
+  ganBuoc('bocuc', 'dang');
+  if (cheDoHtml && edl.els.length) {
+    const doMotLan = async () => {
+      const dsDo = await doDacOverlay({
+        storyboard: { els: edl.els, caps: edl.caps, dur: sauCat.thoiLuong },
+        skin: style.skin || {}, khongGian, thuMuc,
+      });
+      return dsDo ? timLoiBoCuc({
+        dsDo, doanKhung: style.khungThe ? edl.doanKhung : [],
+        caps: edl.caps, khongGian, thoiLuong: sauCat.thoiLuong,
+      }) : [];
+    };
+    let loi = await doMotLan();
+    if (loi.length && edl.nguon === 'claude' && process.env.XUONG_BO_QUA_CLAUDE !== '1') {
+      try { // một lượt nhờ đạo diễn tự sửa toạ độ
+        const ra = await goiClaude(
+          `Storyboard đồ hoạ bị ${loi.length} lỗi bố cục:\n${loi.map((l) => '- ' + l.moTa).join('\n')}\n` +
+          `Đây là do_hoa hiện tại: ${JSON.stringify(edl.els)}\nframing: ${JSON.stringify(edl.doanKhung.map((f) => ({ t: f.batDau, preset: f.preset })))}\n` +
+          `Sửa toạ độ/thời gian cho hết lỗi (giữ nguyên nội dung chữ). Trả về DUY NHẤT JSON {"do_hoa":[...], "framing":[...]}.`,
+          { gioiHanGiay: 180 });
+        const sua = trichJson(ra);
+        if (sua?.do_hoa) {
+          edl.els = chuanHoaDoHoa(sua.do_hoa, sauCat.thoiLuong, { khongGian });
+          if (sua.framing?.length) edl.doanKhung = tinhDoanKhung(sua.framing, sauCat.thoiLuong, khongGian);
+          loi = await doMotLan();
+        }
+      } catch { /* sửa không được thì gỡ phần tử lỗi */ }
+    }
+    if (loi.length) {
+      edl.els = goPhanTuLoi(edl.els, loi);
+      ganBuoc('bocuc', 'xong', `Còn ${loi.length} lỗi sau lượt sửa — đã gỡ phần tử vi phạm, còn ${edl.els.length} module`);
+    } else {
+      ganBuoc('bocuc', 'xong', `0 lỗi — ${edl.els.length} module, ${edl.caps.length} dòng phụ đề đã đo đạc sạch`);
+    }
+  } else {
+    ganBuoc('bocuc', 'boqua', cheDoHtml ? 'Không có module đồ hoạ' : 'Chế độ ASS không cần soi');
+  }
 
   // ── 5. Render khung chính ───────────────────────────────────────────
   ganBuoc('render', 'dang');
   const nenSang = (await doDoSang('nhap.mp4', thuMuc)) > 170;
-  const kq = await renderKhung({
-    thuMuc, tepGoc, khung: khungChinh, doanGiu, style, edl, transcript, tuyChon,
-    tenRa: 'ra.mp4', nenSang,
-  });
+  const renderChinh = (tenRa) => cheDoHtml
+    ? renderKhungHtml({
+        thuMuc, tepGoc, khung: khungChinh, doanGiu, style, edl, transcript, tuyChon, tenRa,
+        ganChiTiet: (ct) => ganBuoc('render', 'dang', ct),
+      })
+    : renderKhung({
+        thuMuc, tepGoc, khung: khungChinh, doanGiu, style, edl, transcript, tuyChon, tenRa, nenSang,
+      });
+  const kq = await renderChinh('ra.mp4');
   baoCao.kichThuoc = kq.kichThuoc;
   baoCao.soSfx = kq.soSfx;
   baoCao.coNhac = kq.coNhac;
@@ -545,14 +795,15 @@ export async function chayViec(viec, ganBuoc) {
   if (process.env.XUONG_TU_SOAT !== '0' && edl.nguon === 'claude' && process.env.XUONG_BO_QUA_CLAUDE !== '1') {
     ketSoat = await tuSoat({ thuMuc, thoiLuong: kq.thoiLuong });
     if (ketSoat && ketSoat.dat === false && (ketSoat.tat_tu_khoa || ketSoat.giam_dong_tac)) {
-      if (ketSoat.tat_tu_khoa) edl.tuKhoa = [];
+      if (ketSoat.tat_tu_khoa) {
+        edl.tuKhoa = [];
+        if (cheDoHtml) edl.els = edl.els.filter((e) => !['bigtype', 'note'].includes(e.module));
+      }
       if (ketSoat.giam_dong_tac) {
         edl.canh = edl.canh.map((c, i) => (i % 2 ? { ...c, dongTac: 'tinh' } : c));
+        if (cheDoHtml) edl.els = edl.els.filter((_, i) => i % 2 === 0 || edl.els[i]?.module === 'progress');
       }
-      await renderKhung({
-        thuMuc, tepGoc, khung: khungChinh, doanGiu, style, edl, transcript, tuyChon,
-        tenRa: 'ra.mp4', nenSang,
-      });
+      await renderChinh('ra.mp4');
       ganBuoc('tusoat', 'xong', `Đạo diễn yêu cầu sửa và đã render lại — ${ketSoat.ghi_chu || ''}`);
     } else {
       ganBuoc('tusoat', 'xong', ketSoat?.ghi_chu ? `Đạt — ${ketSoat.ghi_chu}` : 'Đạt');

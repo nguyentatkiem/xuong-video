@@ -123,13 +123,13 @@ export function xayDoLocPass2V2({
  * viTriSfx: chỉ số input của từng tệp sfx; suKien: [{giay, sfx}].
  * Trả null nếu không có gì để trộn (giữ -c:a copy).
  */
-export function xayLocAmThanh({ suKien = [], viTriSfx = {}, viTriNhac = null, thoiLuong }) {
+export function xayLocAmThanh({ suKien = [], viTriSfx = {}, viTriNhac = null, thoiLuong, nhanGiong = '0:a' }) {
   const coSfx = suKien.length > 0 && Object.keys(viTriSfx).length > 0;
   if (!coSfx && viTriNhac === null) return null;
 
   const phan = [];
   const nhanTron = [];
-  phan.push('[0:a]anull[giong]');
+  phan.push(`[${nhanGiong}]anull[giong]`);
 
   suKien.slice(0, 40).forEach((sk, i) => {
     const idx = viTriSfx[sk.sfx];

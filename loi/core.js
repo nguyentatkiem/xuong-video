@@ -66,6 +66,7 @@ export function tinhDoanGiu(imLang, tongThoiLuong, { dem = 0.2, imToiThieu = 0.4
 
 /** Chuỗi filter đổi khung hình (trừ doc-blur là chuỗi nhiều nhánh, xử lý riêng). */
 function chuoiKhung(khung) {
+  if (khung === 'goc') return 'null'; // giữ nguyên khung gốc — dùng khi lồng video vào thẻ
   if (khung === 'doc-crop') {
     return 'scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1';
   }

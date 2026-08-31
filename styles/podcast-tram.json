@@ -24,5 +24,53 @@
   "progressBar": false,
   "chuKieu": {
     "co": 44
-  }
+  },
+  "doHoaHtml": true,
+  "khungThe": true,
+  "vongKhung": [
+    "hero-left",
+    "hero-right",
+    "full"
+  ],
+  "skin": {
+    "gold": "#F7D33B",
+    "goldBright": "#FFF160",
+    "card": "#1F1C13",
+    "ink": "#0F0E0C",
+    "white": "#F4F2E5",
+    "nen": {
+      "bg": [
+        10,
+        10,
+        12
+      ],
+      "glowRgb": [
+        90,
+        84,
+        60
+      ],
+      "grid": 0,
+      "glows": [
+        [
+          0.3,
+          0.25,
+          0.5,
+          36
+        ],
+        [
+          0.85,
+          0.8,
+          0.4,
+          22
+        ]
+      ]
+    }
+  },
+  "moduleChoPhep": [
+    "lockup",
+    "note",
+    "tag",
+    "lower3",
+    "progress"
+  ]
 }

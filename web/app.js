@@ -109,6 +109,7 @@ $('nut-chay').addEventListener('click', () => {
   if ($('o-mat-do').value) tinhChinh.matDo = $('o-mat-do').value;
   if ($('o-phu-de').value) tinhChinh.phuDe = $('o-phu-de').value;
   if ($('o-sfx').value) tinhChinh.sfx = $('o-sfx').value === 'bat';
+  if ($('o-do-hoa').value) tinhChinh.doHoa = $('o-do-hoa').value;
   duLieu.append('tinhChinh', JSON.stringify(tinhChinh));
   duLieu.append('xuatThem', ['k-ngang', 'k-doc', 'k-vuong']
     .filter((k) => $(k).checked).map((k) => $(k).value).join(','));

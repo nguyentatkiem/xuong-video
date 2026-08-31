@@ -55,9 +55,20 @@ node scripts/dung.js thu-muc/ --style storytime --muc-cat manh --xuat-them ngang
 - `sfx/` — 5 tệp tổng hợp sẵn (whoosh/pop/ding/tick/riser, tạo bởi `scripts/tao-sfx.sh`), thay tệp xịn hơn tuỳ ý.
 - `nhac/` — nhạc nền theo mood (xem `nhac/DOC-TOI.md`); tự ducking khi có giọng nói.
 
+## Đồ hoạ HTML (v3 — học từ skill "AI Dark Keynote")
+
+Ngoài lớp chữ ASS, các style có `"doHoaHtml": true` render **lớp đồ hoạ HTML/CSS thật** qua Chromium (Playwright): 18 module (tag, rows, bigtype, myth gạch đỏ, chart vẽ dần, gridfill, flow, steps, lockup, cta, counter, progress, lower3…), video lồng thẻ bo góc trên canvas có lưới + quầng sáng (`"khungThe": true`), phụ đề 0,8–1,3s/dòng bôi vàng từ khoá, và **soi bố cục bằng đo đạc thật trước khi render** (đè thẻ/đè phụ đề/đè nhau → đạo diễn tự sửa toạ độ, còn lỗi thì gỡ phần tử).
+
+- Mỗi style một `skin` (token màu + nền) trên cùng engine `do-hoa/overlay.html` — thêm skin là thêm chất mới
+- Cần `pnpm install` + `npx playwright install chromium`; thiếu Chromium thì tự rơi về lớp ASS
+- Render chậm hơn (~5–7× thời lượng clip); UI có công tắc "Lớp đồ hoạ: Đẹp (HTML) / Nhanh (ASS)"
+- Font Be Vietnam Pro (giấy phép OFL) đóng gói trong `assets/fonts/`
+
 ## Style
 
-11 style trong [styles/](styles/) — mỗi style là **một tệp JSON**, muốn thêm style mới chỉ cần thêm tệp (không sửa code):
+12 style trong [styles/](styles/) — mỗi style là **một tệp JSON**, muốn thêm style mới chỉ cần thêm tệp (không sửa code):
+
+- **AI Dark Keynote** 🌒 — style học nguyên bản từ video mẫu: đen ấm + vàng, thẻ video đổi khung, đồ hoạ dựng theo lời nói
 
 - **Podcast**: Clip dọc Hormozi · Podcast trầm chuyên nghiệp
 - **Vlog**: Storytime minh hoạ · Vlog đời thường (Casey Neistat) · Aesthetic nhẹ nhàng

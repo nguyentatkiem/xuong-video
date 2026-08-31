@@ -26,5 +26,35 @@
   ],
   "sfx": true,
   "flash": true,
-  "progressBar": true
+  "progressBar": true,
+  "doHoaHtml": true,
+  "khungThe": false,
+  "skin": {
+    "gold": "#F7D33B",
+    "goldBright": "#FFF160",
+    "card": "#1F1C13",
+    "ink": "#0F0E0C",
+    "white": "#F4F2E5",
+    "nen": {
+      "bg": [
+        15,
+        14,
+        12
+      ],
+      "glowRgb": [
+        150,
+        132,
+        40
+      ],
+      "grid": 90
+    }
+  },
+  "moduleChoPhep": [
+    "rows",
+    "cta",
+    "gridfill",
+    "tag",
+    "bigtype",
+    "counter"
+  ]
 }
