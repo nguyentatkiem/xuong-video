@@ -127,3 +127,16 @@ test('timPhach bắt điểm năng lượng vọt, nepTheoPhach chỉ nẹp modu
   assert.ok(Math.abs(els[0].t - 1.5) < 0.07, 'tag nẹp vào phách 1.5s: ' + els[0].t);
   assert.equal(els[1].t, 1.2, 'note không đánh dấu thì giữ nguyên');
 });
+
+test('chuanHoaMotion lọc loại lạ, kẹp mốc/thời lượng, tối đa 3 màn', async () => {
+  const { chuanHoaMotion } = await import('../loi/storyboard.js');
+  const ds = chuanHoaMotion([
+    { loai: 'intro', t: 0, giay: 3, duLieu: { tieuDe: 'X' } },
+    { loai: 'hologram', t: 5 },
+    { loai: 'outro', t: 29, giay: 9 },
+    { loai: 'scorecard', t: 40, duLieu: {} },
+  ], 31);
+  assert.equal(ds.length, 2);
+  assert.equal(ds[0].loai, 'intro');
+  assert.ok(ds[1].giay <= 2.001, 'outro bị kẹp trong thời lượng còn lại: ' + ds[1].giay);
+});

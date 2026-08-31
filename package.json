@@ -8,9 +8,14 @@
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
+    "@remotion/bundler": "^4.0.519",
+    "@remotion/renderer": "^4.0.519",
     "express": "^4.21.2",
     "lottie-web": "^5.13.0",
     "multer": "^2.0.2",
-    "playwright": "^1.62.1"
+    "playwright": "^1.62.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "remotion": "^4.0.519"
   }
 }

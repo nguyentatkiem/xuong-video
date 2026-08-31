@@ -106,3 +106,9 @@ Dữ liệu mỗi lần dựng nằm ở `du-lieu/viec/<id>/` (video gốc, các
 - **Beat-reveal**: style có `beatSync: true` (fast-paced, storytime, review-doc) tự nẹp đồ hoạ vào phách nhạc dò từ sóng âm
 - **Style 14 "Audiogram"** 🌊 cho nội dung thuần tiếng; **loudness 2-pass** đo thật rồi chuẩn tuyến tính
 - Đã cân nhắc MoviePy (bỏ — chậm, trùng năng lực) và Remotion (học kiến trúc; nếu sau này tích hợp thật: miễn phí cá nhân/công ty ≤3 người, tổ chức lớn hơn cần license Automators $0.01/render)
+
+## v5 — Tầng motion Remotion
+
+Style có `"remotion": true` (keynote, clean-tech, fast-paced, review×2) được đạo diễn chèn tối đa 3 **màn motion cao cấp** render bằng Remotion (React + spring animation, webm nền trong suốt phủ lên video): `intro` thương hiệu, `scorecard` chấm điểm, `sosanh` bảng so sánh, `outro` kêu gọi. Composition trong `remotion/comps/` — thêm màn mới = thêm 1 tệp TSX + đăng ký trong `Root.tsx`.
+
+> **Giấy phép Remotion**: miễn phí cho cá nhân và tổ chức ≤3 người (trường hợp hiện tại). Nếu sau này Xưởng Video vận hành cho tổ chức lớn hơn, cần license "Remotion for Automators" ($0.01/render, tối thiểu $100/tháng) — xem remotion.dev/docs/license. Muốn né hẳn thì tắt `remotion` trong style, mọi tính năng khác không phụ thuộc.

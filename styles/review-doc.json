@@ -59,5 +59,6 @@
     "datapie",
     "sticker"
   ],
-  "beatSync": true
+  "beatSync": true,
+  "remotion": true
 }

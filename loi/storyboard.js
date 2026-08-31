@@ -33,6 +33,24 @@ export function timPhach(peaks, hz, { toiThieuCach = 0.28 } = {}) {
   return phach.slice(0, 400);
 }
 
+/** Chuẩn hoá danh sách màn motion Remotion từ đạo diễn: 4 loại, ≤3 màn, kẹp mốc. */
+export function chuanHoaMotion(tho, thoiLuong) {
+  const so = (x) => (Number.isFinite(x) ? x : parseFloat(x));
+  const DS = ['intro', 'scorecard', 'sosanh', 'outro'];
+  const DAI = { intro: 3, scorecard: 5, sosanh: 5, outro: 3.5 };
+  return (Array.isArray(tho) ? tho : [])
+    .map((m) => ({
+      loai: String(m.loai || ''),
+      t: Math.max(0, so(m.t) || 0),
+      giay: Math.min(7, Math.max(2, so(m.giay) || DAI[m.loai] || 3)),
+      duLieu: (typeof m.duLieu === 'object' && m.duLieu) || {},
+    }))
+    .filter((m) => DS.includes(m.loai) && m.t < thoiLuong - 1)
+    .map((m) => ({ ...m, giay: Math.min(m.giay, thoiLuong - m.t) }))
+    .sort((a, b) => a.t - b.t)
+    .slice(0, 3);
+}
+
 /** Nẹp các module có batTheoNhip vào mốc phách gần nhất phía sau (lệch ≤1s). */
 export function nepTheoPhach(els, phach, { toiDaLech = 1.0 } = {}) {
   if (!phach?.length) return els;

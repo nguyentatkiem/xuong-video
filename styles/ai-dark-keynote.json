@@ -66,5 +66,6 @@
     "slideleft",
     "fadeblack",
     "smoothup"
-  ]
+  ],
+  "remotion": true
 }

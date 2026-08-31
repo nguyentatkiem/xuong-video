@@ -21,8 +21,9 @@ import {
 import {
   DS_MODULE, KHONG_GIAN, KHUNG_THE, TI_LE_NET, tenKhongGian,
   taoCaption, tinhDoanKhung, khungTheDuPhong, chuanHoaDoHoa,
-  timLoiBoCuc, goPhanTuLoi, suKienSfxV3, timPhach, nepTheoPhach,
+  timLoiBoCuc, goPhanTuLoi, suKienSfxV3, timPhach, nepTheoPhach, chuanHoaMotion,
 } from '../loi/storyboard.js';
+import { coRemotion, renderMotion } from './remotion.js';
 import { coChromium, doDacOverlay, chupOverlay, chupCanvas, chupMask, luuTrangOverlay } from './chromium.js';
 
 const GOC = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
@@ -264,7 +265,7 @@ Trả THÊM hai trường trong JSON:
 }
 
 /** Đạo diễn v2/v3: transcript + khung hình + manifest media → EDL đầy đủ. */
-async function goiDaoDien({ transcript, style, thoiLuong, tuyChon, tenTep, khungMau, manifest, cheDoHtml = false, khongGian = 'doc' }) {
+async function goiDaoDien({ transcript, style, thoiLuong, tuyChon, tenTep, khungMau, manifest, cheDoHtml = false, khongGian = 'doc', coMotion = false }) {
   if (process.env.XUONG_BO_QUA_CLAUDE === '1') return null;
 
   const dongTacChoPhep = style.dongTacChoPhep?.length ? style.dongTacChoPhep : CAC_DONG_TAC;
@@ -283,10 +284,18 @@ async function goiDaoDien({ transcript, style, thoiLuong, tuyChon, tenTep, khung
     : '\n(Kênh chưa có thư viện media — "anh" để mảng rỗng.)';
 
   const phanDoHoa = cheDoHtml ? taPhanDoHoa(style, khongGian) : '';
+  const phanMotion = coMotion ? `
+MÀN MOTION CAO CẤP (Remotion) — mỗi màn PHỦ TOÀN KHUNG trên nền mờ, dùng cho khoảnh khắc đắt nhất, tối đa 3 màn, trả trong trường "motion":
+- intro {duLieu:{tieuDe, kenh}} — mở màn thương hiệu, t=0, ~3s
+- scorecard {duLieu:{tieuChi:[{ten, diem 0-10}] ≤5, tong}} — CHỈ khi lời nói chấm điểm/đánh giá thật, ~5s
+- sosanh {duLieu:{traiTen, phaiTen, hang:[{ten, trai, phai}] ≤5}} — CHỈ khi so sánh 2 thứ có thông số thật, ~5s
+- outro {duLieu:{loiKeu, kenh}} — kêu gọi cuối video, t = cuối − 3.5s
+Ví dụ: "motion": [{"loai":"intro","t":0,"giay":3,"duLieu":{"tieuDe":"...","kenh":"..."}}]
+Trong lúc màn motion chiếu, ĐỪNG đặt module do_hoa trùng thời gian.` : '';
   const prompt = `Bạn là đạo diễn dựng video chuyên nghiệp. Video dài ${thoiLuong.toFixed(1)} giây, tên tệp gốc "${tenTep}".
 Style edit: ${style.ten} — ${style.moTa}
 Tiêu đề người dùng đặt (có thể trống): "${tuyChon.tieuDe || ''}". Tên kênh: "${tuyChon.tenKenh || ''}".
-${phanTranscript}${phanMat}${phanMedia}${phanDoHoa}
+${phanTranscript}${phanMat}${phanMedia}${phanDoHoa}${phanMotion}
 
 Trả về DUY NHẤT một JSON theo mẫu:
 {
@@ -471,9 +480,10 @@ async function renderKhungHtml({
   let tepAss = null;
   if (CO_LIBASS) {
     tepAss = `do-hoa-${hauTo}.ass`;
+    const coManIntro = (edl.motion || []).some((m) => m.loai === 'intro');
     await writeFile(path.join(thuMuc, tepAss), taoAssDoHoa({
       ...kichThuoc, thoiLuong: sau.thoiLuong,
-      tieuDe: style.chuTieuDe !== false ? (tuyChon.tieuDe || edl.tieuDe[0] || '') : '',
+      tieuDe: style.chuTieuDe !== false && !coManIntro ? (tuyChon.tieuDe || edl.tieuDe[0] || '') : '',
       tenKenh: style.watermark !== false ? (tuyChon.tenKenh || '') : '',
       tuKhoa: [], chuong: [], suKienThem: [],
     }));
@@ -481,6 +491,11 @@ async function renderKhungHtml({
 
   // ── Âm thanh + ghép cuối ────────────────────────────────────────────
   const suKienSfx = style.sfx !== false ? suKienSfxV3({ doanKhung: dungThe ? edl.doanKhung : [], els: edl.els }) : [];
+  const dsMotion = edl.motion || [];
+  if (style.sfx !== false && dsMotion.length) {
+    for (const m of dsMotion) suKienSfx.push({ giay: m.t, sfx: m.loai === 'intro' ? 'riser' : 'ding' });
+    suKienSfx.sort((a, b) => a.giay - b.giay);
+  }
   const tepNhac = style.nhacMood
     ? [`${style.nhacMood}.mp3`, `${style.nhacMood}.wav`, `${style.nhacMood}.m4a`]
         .map((t) => path.join(GOC, 'nhac', t)).find((t) => existsSync(t)) || null
@@ -500,6 +515,22 @@ async function renderKhungHtml({
   let viTriNhac = null;
   if (tepNhac) { inputs.push('-i', tepNhac); viTriNhac = viTri++; }
 
+  // màn motion Remotion: render webm alpha rồi thêm làm input phủ lên trên
+  const viTriMotion = [];
+  for (let i = 0; i < dsMotion.length; i++) {
+    const m = dsMotion[i];
+    const tepMo = path.join(thuMuc, `motion-${hauTo}-${i}.webm`);
+    try {
+      if (ganChiTiet) ganChiTiet(`Render màn motion "${m.loai}" (Remotion)…`);
+      await renderMotion({
+        loai: m.loai, duLieu: m.duLieu, skin: style.skin || {},
+        kichThuoc, giay: m.giay, tepRa: tepMo,
+      });
+      inputs.push('-c:v', 'libvpx', '-i', tepMo);
+      viTriMotion.push({ idx: viTri++, m });
+    } catch { /* màn motion lỗi thì bỏ qua, không phá video */ }
+  }
+
   const amThanh = xayLocAmThanh({
     suKien: suKienSfx, viTriSfx, viTriNhac, thoiLuong: sau.thoiLuong, nhanGiong: '2:a',
   });
@@ -507,8 +538,16 @@ async function renderKhungHtml({
     ...(tepAss ? [`ass=${tepAss}`] : []),
     'fade=t=in:d=0.4', `fade=t=out:st=${Math.max(0, sau.thoiLuong - 0.45).toFixed(3)}:d=0.45`,
   ].join(',');
-  const filter = `[0:v][1:v]overlay=0:0:shortest=1[vo];[vo]${chuoiCuoi}[vout]`
-    + (amThanh ? `;${amThanh.filterAudio}` : '');
+  const phanV = ['[0:v][1:v]overlay=0:0:shortest=1[vo0]'];
+  let nhanV = '[vo0]';
+  viTriMotion.forEach(({ idx, m }, i) => {
+    // đệm khúc đầu bằng khung trong suốt để màn motion vào đúng mốc t
+    phanV.push(`[${idx}:v]format=yuva420p,tpad=start_duration=${m.t.toFixed(3)}:start_mode=add:color=black@0.0[mo${i}]`);
+    phanV.push(`${nhanV}[mo${i}]overlay=0:0:eof_action=pass:repeatlast=0[vo${i + 1}]`);
+    nhanV = `[vo${i + 1}]`;
+  });
+  phanV.push(`${nhanV}${chuoiCuoi}[vout]`);
+  const filter = phanV.join(';') + (amThanh ? `;${amThanh.filterAudio}` : '');
   await ffmpeg([
     ...inputs, '-filter_complex', filter,
     '-map', '[vout]',
@@ -744,6 +783,7 @@ export async function chayViec(viec, ganBuoc) {
   ganBuoc('daodien', 'dang');
   const khongGian = tenKhongGian(khungChinh);
   const cheDoHtml = Boolean(style.doHoaHtml) && await coChromium();
+  const coMotion = cheDoHtml && style.remotion === true && await coRemotion();
   const manifest = await docManifestAsync();
   const khungMau = process.env.XUONG_DAO_DIEN_MAT !== '0'
     ? await trichKhungMau('nhap.mp4', thuMuc, sauCat.thoiLuong) : [];
@@ -755,7 +795,7 @@ export async function chayViec(viec, ganBuoc) {
     const tho = await goiDaoDien({
       transcript, style, thoiLuong: sauCat.thoiLuong, tuyChon,
       tenTep: viec.tenTepGoc || path.basename(tepGoc), khungMau, manifest,
-      cheDoHtml, khongGian,
+      cheDoHtml, khongGian, coMotion,
     });
     if (tho) {
       const v1 = chuanHoaEdl(tho, sauCat.thoiLuong, style);
@@ -767,6 +807,7 @@ export async function chayViec(viec, ganBuoc) {
         }),
         anh: v2.anh, suaChu: v2.suaChu, soDem: v2.soDem,
         doHoaTho: tho.do_hoa, framingTho: tho.framing, rampTho: tho.ramp,
+        motion: coMotion ? chuanHoaMotion(tho.motion, sauCat.thoiLuong) : [],
       };
     } else {
       edl = {
@@ -811,6 +852,7 @@ export async function chayViec(viec, ganBuoc) {
       strike_at: e.strike_at != null ? doiT(Number(e.strike_at)) : e.strike_at,
     }));
     edl.framingTho = (edl.framingTho || []).map((f) => ({ ...f, t: doiT(Number(f.t)) }));
+    edl.motion = (edl.motion || []).map((m) => ({ ...m, t: doiT(m.t) }));
     sauCat.thoiLuong = ax.thoiLuongMoi;
     baoCao.thoiLuongSauCat = ax.thoiLuongMoi;
     baoCao.soRamp = edl.ramp.length;
