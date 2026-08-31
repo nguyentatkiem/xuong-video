@@ -94,10 +94,9 @@ Dữ liệu mỗi lần dựng nằm ở `du-lieu/viec/<id>/` (video gốc, các
 
 ## Lộ trình (chưa làm)
 
-- Speed-ramp có giữ khớp tiếng (đổi kiến trúc lượt 1)
-- Cắt theo beat nhạc nền (aubio) + whip-pan có nhoè chuyển động
-- Chuyển renderer sang Remotion cho bảng so sánh/scorecard động ngoài tầm ASS
+- Whip-pan có nhoè chuyển động thật (motion blur)
 - Nhiều worker song song cho hàng đợi
+- Tích hợp Remotion thật khi cần template 3D phức tạp (lưu ý license nếu dùng cho tổ chức >3 người)
 
 ## v4 — FFmpeg nâng cao + engine học Remotion (không license)
 
