@@ -10,7 +10,8 @@ import {
   phanTichImLang, tinhDoanGiu, xayDoLocPass1, chuoiMau,
   kichThuocKhung, taoAssPhuDe, taoAssDoHoa, taoSrt, tapTuNoiBat,
   edlDuPhong, trichJson, chuanHoaEdl, ghepMoTaSeo,
-  lamSachTranscript, nguongImLang, chonKhungXuat,
+  lamSachTranscript, nguongImLang, chonKhungXuat, vungNoiTuImLang,
+  tinhKhoangTrong, gopTranscript, locKhucBu,
 } from '../loi/core.js';
 import {
   xayDoLocPass2V2, xayLocAmThanh, taoSuKienSfx, canhDuPhong, chuanHoaCanh,
@@ -612,31 +613,67 @@ export async function chayViec(viec, ganBuoc) {
     ? `Cắt ${tongCat.toFixed(1)}s im lặng (${baoCao.soDoanCat} chỗ, ngưỡng ${nguong}), còn ${sauCat.thoiLuong.toFixed(1)}s`
     : 'Không cắt im lặng (theo tuỳ chọn/style)');
 
-  // ── 3. Transcript ────────────────────────────────────────────────────
+  // ── 3. Transcript (bóc cả tệp + bóc bù các khoảng whisper nuốt) ─────
   ganBuoc('transcript', 'dang');
   let transcript = null;
+  let soKhucBu = 0;
   const lenhWhisper = await timWhisper();
+  const bocWav = async (tepWav, tenGoc) => {
+    const ngonNgu = process.env.XUONG_NGON_NGU || 'vi';
+    const model = process.env.XUONG_WHISPER_MODEL
+      || (lenhWhisper === 'mlx_whisper' ? 'mlx-community/whisper-large-v3-turbo' : 'small');
+    const args = lenhWhisper === 'mlx_whisper'
+      ? [tepWav, '--model', model, '--output-dir', '.', '--output-format', 'json',
+         '--word-timestamps', 'True', '--condition-on-previous-text', 'False', '--language', ngonNgu]
+      : [tepWav, '--output_dir', '.', '--output_format', 'json', '--word_timestamps', 'True',
+         '--condition_on_previous_text', 'False', '--language', ngonNgu, '--model', model];
+    const kq = await chayLenh(lenhWhisper, args, {
+      cwd: thuMuc, gioiHanGiay: 3600, themPath: path.dirname(FFMPEG),
+    });
+    const tepJson = path.join(thuMuc, tenGoc + '.json');
+    if (kq.ma !== 0 || !existsSync(tepJson)) return null;
+    return docTranscriptWhisper(JSON.parse(await readFile(tepJson, 'utf8')));
+  };
   if (lenhWhisper && style.phuDe !== 'khong') {
     try {
       await ffmpeg(['-i', 'nhap.mp4', '-vn', '-ar', '16000', '-ac', '1', 'tieng.wav'], thuMuc);
-      const ngonNgu = process.env.XUONG_NGON_NGU || 'vi';
-      const model = process.env.XUONG_WHISPER_MODEL
-        || (lenhWhisper === 'mlx_whisper' ? 'mlx-community/whisper-large-v3-turbo' : 'small');
-      const args = lenhWhisper === 'mlx_whisper'
-        ? ['tieng.wav', '--model', model, '--output-dir', '.', '--output-format', 'json', '--word-timestamps', 'True', '--language', ngonNgu]
-        : ['tieng.wav', '--output_dir', '.', '--output_format', 'json', '--word_timestamps', 'True', '--language', ngonNgu, '--model', model];
-      const kq = await chayLenh(lenhWhisper, args, {
-        cwd: thuMuc, gioiHanGiay: 3600, themPath: path.dirname(FFMPEG),
-      });
-      if (kq.ma === 0 && existsSync(path.join(thuMuc, 'tieng.json'))) {
-        transcript = docTranscriptWhisper(JSON.parse(await readFile(path.join(thuMuc, 'tieng.json'), 'utf8')));
-        transcript = lamSachTranscript(transcript, sauCat.thoiLuong);
+      transcript = await bocWav('tieng.wav', 'tieng');
+      if (transcript) {
+        // whisper cả-tệp hay nuốt đoạn giữa khi nền ồn → tìm khoảng trống, bóc bù từng khúc
+        const { giu, khoangTrong } = tinhKhoangTrong(transcript, sauCat.thoiLuong);
+        transcript = { doan: giu };
+        for (let i = 0; i < khoangTrong.length; i++) {
+          const kt = khoangTrong[i];
+          const batDau = Math.max(0, kt.batDau - 0.15);
+          ganBuoc('transcript', 'dang', `Bóc bù khúc ${i + 1}/${khoangTrong.length} (${kt.batDau.toFixed(1)}–${kt.ketThuc.toFixed(1)}s)…`);
+          await ffmpeg(['-ss', batDau.toFixed(2), '-t', (kt.ketThuc - batDau + 0.15).toFixed(2),
+            '-i', 'tieng.wav', `khuc-${i}.wav`], thuMuc);
+          const phan = await bocWav(`khuc-${i}.wav`, `khuc-${i}`);
+          if (phan?.doan?.length) {
+            const doanBu = locKhucBu(transcript.doan, phan.doan.map((d) => ({
+              ...d,
+              batDau: d.batDau + batDau, ketThuc: d.ketThuc + batDau,
+              tu: d.tu?.map((t) => ({ ...t, batDau: t.batDau + batDau, ketThuc: t.ketThuc + batDau })),
+            })));
+            if (doanBu.length) { soKhucBu++; transcript = gopTranscript(transcript, doanBu); }
+          }
+        }
+        // dò vùng có tiếng để neo nốt các cụm mốc rác còn sót
+        const amLuongTieng = await doAmLuong('tieng.wav', thuMuc);
+        const kqIm = await chayLenh(FFMPEG, [
+          '-hide_banner', '-i', 'tieng.wav',
+          '-af', `silencedetect=noise=${nguongImLang(amLuongTieng, 'vua')}:d=0.35`, '-f', 'null', '-',
+        ], { cwd: thuMuc });
+        const vungNoi = vungNoiTuImLang(phanTichImLang(kqIm.err, sauCat.thoiLuong), sauCat.thoiLuong);
+        transcript = lamSachTranscript(transcript, sauCat.thoiLuong, { vungNoi });
+        if (!transcript.doan.length) transcript = null;
       }
     } catch { /* thiếu transcript không chặn pipeline */ }
   }
   baoCao.coTranscript = Boolean(transcript);
+  baoCao.soKhucBu = soKhucBu;
   ganBuoc('transcript', transcript ? 'xong' : 'boqua', transcript
-    ? `${transcript.doan.length} câu (${lenhWhisper})`
+    ? `${transcript.doan.length} câu (${lenhWhisper}${soKhucBu ? `, bóc bù ${soKhucBu} khúc whisper nuốt` : ''})`
     : (style.phuDe === 'khong' ? 'Style này không dùng phụ đề'
       : 'Máy chưa cài whisper — bỏ qua phụ đề (cài: uv tool install mlx-whisper)'));
 

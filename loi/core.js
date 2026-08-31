@@ -226,14 +226,89 @@ const DINH_DANG_SU_KIEN = `
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `;
 
+/** Từ danh sách khoảng lặng → danh sách VÙNG CÓ TIẾNG NÓI (phần bù, gộp kẽ hở nhỏ). */
+export function vungNoiTuImLang(imLang, thoiLuong, { keToiThieu = 0.3 } = {}) {
+  const sx = [...imLang].sort((a, b) => a.batDau - b.batDau);
+  const vung = [];
+  let conTro = 0;
+  for (const kl of sx) {
+    if (kl.batDau - conTro > 0.15) vung.push({ batDau: conTro, ketThuc: kl.batDau });
+    conTro = Math.max(conTro, kl.ketThuc);
+  }
+  if (thoiLuong - conTro > 0.15) vung.push({ batDau: conTro, ketThuc: thoiLuong });
+  // gộp hai vùng cách nhau < keToiThieu
+  const gop = [];
+  for (const v of vung) {
+    const truoc = gop[gop.length - 1];
+    if (truoc && v.batDau - truoc.ketThuc < keToiThieu) truoc.ketThuc = v.ketThuc;
+    else gop.push({ ...v });
+  }
+  return gop;
+}
+
+/**
+ * Whisper chạy cả tệp hay NUỐT đoạn giữa khi nền ồn (hội trường, nhạc):
+ * trả về các đoạn giữ được + các KHOẢNG TRỐNG cần bóc bù từng khúc.
+ * Đoạn suy biến (<0.12s/từ — mốc rác) bị loại và tính vào khoảng trống.
+ */
+export function tinhKhoangTrong(transcript, thoiLuong, { trongToiThieu = 3, toiDa = 6 } = {}) {
+  const giu = [];
+  const pham = []; // [batDau, ketThuc] thực sự có lời theo mốc TỪ (kẹp 1s/từ)
+  for (const d of transcript?.doan || []) {
+    if (d.tu?.length) {
+      const be = Math.min(d.tu[d.tu.length - 1].ketThuc, d.tu[d.tu.length - 1].batDau + 1)
+        - d.tu[0].batDau;
+      if (be / d.tu.length < 0.12) continue; // mốc rác → coi như trống, sẽ bóc bù
+      giu.push(d);
+      pham.push([d.tu[0].batDau, d.tu[d.tu.length - 1].batDau + Math.min(1, d.tu[d.tu.length - 1].ketThuc - d.tu[d.tu.length - 1].batDau)]);
+    } else {
+      giu.push(d);
+      pham.push([d.batDau, Math.min(d.ketThuc, d.batDau + 15)]);
+    }
+  }
+  pham.sort((a, b) => a[0] - b[0]);
+  const khoangTrong = [];
+  let conTro = 0;
+  for (const [b, k] of pham) {
+    if (b - conTro >= trongToiThieu) khoangTrong.push({ batDau: conTro, ketThuc: b });
+    conTro = Math.max(conTro, k);
+  }
+  if (thoiLuong - conTro >= trongToiThieu) khoangTrong.push({ batDau: conTro, ketThuc: thoiLuong });
+  khoangTrong.sort((a, b) => (b.ketThuc - b.batDau) - (a.ketThuc - a.batDau));
+  return { giu, khoangTrong: khoangTrong.slice(0, toiDa).sort((a, b) => a.batDau - b.batDau) };
+}
+
+/** Gộp các đoạn bóc bù (đã cộng mốc lệch) vào transcript, sắp theo thời gian. */
+export function gopTranscript(goc, them) {
+  const doan = [...(goc?.doan || []), ...them].sort((a, b) => a.batDau - b.batDau);
+  return { doan };
+}
+
+/**
+ * Lọc ảo giác trong khúc bóc bù: whisper gặp tiếng ồn đám đông hay "nghe ra"
+ * lại đúng câu đã có ở chỗ khác, hoặc nhả ra 1 từ vu vơ cực ngắn.
+ */
+export function locKhucBu(doanGoc, doanBu) {
+  const chuan = (s) => String(s).toLowerCase().replace(/[^\p{L}\p{N} ]/gu, '').replace(/\s+/g, ' ').trim();
+  const daCo = new Set(doanGoc.map((d) => chuan(d.chu)));
+  return doanBu.filter((d) => {
+    const c = chuan(d.chu);
+    if (!c) return false;
+    if (daCo.has(c)) return false;
+    if (c.split(' ').length <= 1 && (d.ketThuc - d.batDau) < 0.7) return false;
+    return true;
+  });
+}
+
 /**
  * Làm sạch transcript whisper trên video thật — whisper hay trả 2 loại rác:
  * (1) đoạn kéo dài qua cả quãng nhạc/im lặng dù lời đã dứt từ lâu;
  * (2) cả câu bị nhồi mốc thời gian vào <1 giây (thường ở cuối tệp).
- * Cách xử lý: tin MỐC TỪNG TỪ, tách đoạn tại khoảng nghỉ giữa từ, và dàn đều
- * lại các cụm từ suy biến (thời lượng trung bình mỗi từ < 0.12s) lùi từ cuối.
+ * Cách xử lý: tin MỐC TỪNG TỪ, tách đoạn tại khoảng nghỉ giữa từ, và dàn lại
+ * các cụm từ suy biến (trung bình < 0.12s/từ) — có `vungNoi` (vùng có tiếng
+ * nói đo từ audio) thì NEO cụm vào đúng vùng nói gần nhất thay vì dàn mù.
  */
-export function lamSachTranscript(transcript, thoiLuong, { khoangTach = 1.1, daiTu = 0.38 } = {}) {
+export function lamSachTranscript(transcript, thoiLuong, { khoangTach = 1.1, daiTu = 0.38, vungNoi = null } = {}) {
   if (!transcript?.doan?.length) return transcript;
   const doanMoi = [];
 
@@ -258,12 +333,22 @@ export function lamSachTranscript(transcript, thoiLuong, { khoangTach = 1.1, dai
       // whisper hay kéo giãn mốc kết thúc của từ qua cả quãng nhạc → kẹp 1s/từ
       .map((t) => ({ ...t, ketThuc: Math.min(t.ketThuc, t.batDau + 1.0) }));
 
-    // cụm suy biến → dàn đều lùi từ mốc cuối
+    // cụm suy biến → dàn lại; ưu tiên neo vào vùng có tiếng nói thật
     const bề = tu[tu.length - 1].ketThuc - tu[0].batDau;
     if (bề / tu.length < 0.12) {
       const cuoi = Math.min(Math.max(tu[tu.length - 1].ketThuc, 0.5), thoiLuong);
-      const dau = Math.max(0, cuoi - daiTu * tu.length);
-      tu = tu.map((t, i) => ({ ...t, batDau: dau + i * daiTu, ketThuc: dau + (i + 1) * daiTu - 0.04 }));
+      const can = daiTu * tu.length;
+      let dau = Math.max(0, cuoi - can);
+      let buoc = daiTu;
+      if (vungNoi?.length) {
+        // vùng nói gần mốc cuối của cụm nhất (kết thúc trong vòng 2.5s quanh mốc cuối)
+        const gan = [...vungNoi].reverse().find((v) => v.batDau < cuoi + 0.5 && v.ketThuc > cuoi - 2.5)
+          || vungNoi[vungNoi.length - 1];
+        const ketVung = Math.min(gan.ketThuc, thoiLuong);
+        dau = Math.max(gan.batDau, ketVung - can);
+        buoc = Math.max(0.16, (ketVung - dau) / tu.length); // nói nhanh thật thì nén nhịp theo
+      }
+      tu = tu.map((t, i) => ({ ...t, batDau: dau + i * buoc, ketThuc: dau + (i + 1) * buoc - 0.04 }));
     }
 
     // tách đoạn tại khoảng nghỉ dài giữa từ

@@ -214,7 +214,7 @@ test('s3 và kichThuocKhung', () => {
 });
 
 // ── Vá lỗi từ video thật (31/08) ──────────────────────────────────────
-const { lamSachTranscript, nguongImLang, chonKhungXuat } = await import('../loi/core.js');
+const { lamSachTranscript, nguongImLang, chonKhungXuat, vungNoiTuImLang, tinhKhoangTrong, gopTranscript, locKhucBu } = await import('../loi/core.js');
 
 test('lamSachTranscript tách đoạn kéo lê qua quãng nhạc, kể cả khi whisper kéo giãn mốc cuối của từ', () => {
   // dữ liệu thật từ video LalaSchool: từ "viên" và "học" bị whisper kéo end qua quãng nhạc
@@ -264,4 +264,63 @@ test('chonKhungXuat: video dọc không bao giờ bị ép sang ngang khi auto',
   assert.equal(chonKhungXuat({ khung: 'ngang' }, false, 'auto'), 'ngang');
   assert.equal(chonKhungXuat({ khung: 'doc-blur' }, false, 'auto'), 'doc-blur');
   assert.equal(chonKhungXuat({ khung: 'ngang' }, true, 'vuong'), 'vuong');
+});
+
+test('vungNoiTuImLang lấy phần bù khoảng lặng và gộp kẽ hở nhỏ', () => {
+  const vung = vungNoiTuImLang([
+    { batDau: 0, ketThuc: 8.1 }, { batDau: 15.2, ketThuc: 28.3 },
+  ], 31);
+  assert.equal(vung.length, 2);
+  assert.ok(Math.abs(vung[0].batDau - 8.1) < 1e-9);
+  assert.ok(Math.abs(vung[0].ketThuc - 15.2) < 1e-9);
+  assert.ok(Math.abs(vung[1].batDau - 28.3) < 1e-9);
+});
+
+test('lamSachTranscript neo cụm suy biến vào vùng có tiếng nói thay vì dàn mù', () => {
+  // 14 từ bị whisper nhồi vào 30.0–31.0; tiếng nói thật ở 28.3–31.0
+  const tu = Array.from({ length: 14 }, (_, i) => ({ batDau: 30 + i * 0.06, ketThuc: 30 + i * 0.06 + 0.02, chu: 'w' + i }));
+  const vungNoi = [{ batDau: 8.1, ketThuc: 15.2 }, { batDau: 28.3, ketThuc: 31 }];
+  const kq = lamSachTranscript({ doan: [{ batDau: 30, ketThuc: 31, chu: 'x', tu }] }, 31, { vungNoi });
+  const d = kq.doan[0];
+  assert.ok(d.batDau >= 28.2, 'phải bắt đầu trong vùng nói (28.3+), không trôi về 25s: ' + d.batDau);
+  assert.ok(d.ketThuc <= 31.01, 'không vượt cuối video');
+  const buoc = (d.tu[1].batDau - d.tu[0].batDau);
+  assert.ok(buoc >= 0.15 && buoc <= 0.25, 'nói nhanh thật → nén nhịp theo vùng: ' + buoc);
+});
+
+test('lamSachTranscript không có vungNoi vẫn dàn lùi như cũ', () => {
+  const tu = Array.from({ length: 10 }, (_, i) => ({ batDau: 30 + i * 0.05, ketThuc: 30 + i * 0.05 + 0.02, chu: 't' + i }));
+  const kq = lamSachTranscript({ doan: [{ batDau: 30, ketThuc: 31, chu: 'x', tu }] }, 31);
+  assert.ok(kq.doan[0].batDau < 28);
+});
+
+test('tinhKhoangTrong tìm đoạn whisper nuốt và loại đoạn mốc rác', () => {
+  const { giu, khoangTrong } = tinhKhoangTrong({ doan: [
+    { batDau: 8.2, ketThuc: 28.3, chu: 'chào', tu: [
+      { batDau: 8.2, ketThuc: 9.6, chu: 'Xin' }, { batDau: 14.6, ketThuc: 15.2, chu: 'học' }] },
+    { batDau: 30, ketThuc: 31, chu: 'x', tu: Array.from({ length: 14 }, (_, i) => ({ batDau: 30 + i * 0.06, ketThuc: 30.06 + i * 0.06, chu: 'w' + i })) },
+  ] }, 31);
+  assert.equal(giu.length, 1, 'đoạn mốc rác 14 từ/1s phải bị loại');
+  // trống: 0–8.2 (đầu) và 15.6–31 (giữa+cuối, gồm cả vùng đoạn rác)
+  assert.equal(khoangTrong.length, 2);
+  assert.ok(khoangTrong[0].ketThuc <= 8.3);
+  assert.ok(khoangTrong[1].batDau < 16 && khoangTrong[1].ketThuc === 31);
+});
+
+test('gopTranscript trộn các khúc bù theo thời gian', () => {
+  const kq = gopTranscript({ doan: [{ batDau: 8, ketThuc: 12, chu: 'a' }] }, [
+    { batDau: 16, ketThuc: 19, chu: 'c' }, { batDau: 13, ketThuc: 15, chu: 'b' },
+  ]);
+  assert.deepEqual(kq.doan.map((d) => d.chu), ['a', 'b', 'c']);
+});
+
+test('locKhucBu bỏ ảo giác lặp câu đã có và 1-từ cực ngắn, giữ câu thật', () => {
+  const goc = [{ batDau: 8.2, ketThuc: 15, chu: 'Xin chào tất cả thành viên lớp học' }];
+  const bu = locKhucBu(goc, [
+    { batDau: 0, ketThuc: 2.5, chu: 'Xin chào tất cả thành viên lớp học' }, // lặp → bỏ
+    { batDau: 2.6, ketThuc: 3.1, chu: 'Branding' },                          // 1 từ 0.5s → bỏ
+    { batDau: 22.1, ketThuc: 24.9, chu: 'Điều thứ hai, xây dựng hệ thống nội dung' }, // thật → giữ
+    { batDau: 30.1, ketThuc: 30.9, chu: 'bạn nhé' },                          // 2 từ → giữ
+  ]);
+  assert.deepEqual(bu.map((d) => d.chu), ['Điều thứ hai, xây dựng hệ thống nội dung', 'bạn nhé']);
 });
