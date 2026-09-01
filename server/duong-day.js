@@ -268,7 +268,7 @@ Module được dùng: ${choPhep.join(', ')}.
 Tham số nhanh: tag{text ≤4 từ} · chips/qchips{items ≤4, mỗi mục ≤3 từ} · iconrow{items từ bộ: doc img vid chart clock bolt user shop link check folder phone laptop spark gear} · rows{items ≤5 [{text,icon}], active: chỉ số dòng vàng; cao = n×70−8px} · pill{text,sub} · flow{items ≤3} · bigtype{kicker,big,sub có |vàng|; cao ~200px} · lockup{l1,l2,l3 — dùng đúng 1 lần; cao ~220px} · steps{items ≤4; cao ~85px} · chart{kicker,label; cao ~180px} · gridfill{kicker,unit,total,count; cao ~205px} · myth{text ≤8 từ, strike_at = đúng giây phủ định; dùng ≤1 lần} · cta{text,sub — cuối video} · note{text có |vàng|} · counter{kicker,tu,den,hauTo} · lower3{text,sub} · waveform{h≈120 — sóng âm nhảy theo tiếng} · sticker{kieu: mui-ten|confetti|lap-lanh, co≈160 — dùng khi ăn mừng/chỉ trỏ} · databar{duLieu:[{ten,giaTri}] ≤5, hauTo — CHỈ khi lời nói nêu số liệu so sánh thật; cao ≈ n×30px} · datapie{giaTri 0-100, ten — một tỉ lệ phần trăm được nói ra}
 Mọi module có thể thêm "vao3d": true (lật 3D nhẹ khi hiện) — dùng tiết chế, hợp intro/CTA.
 Khung thẻ video (framing): ${dsPreset}. Đổi khung 5–8s một lần, tại điểm chuyển ý. pan_y 0.30–0.55 (mặc định 0.42, giảm nếu cắt mất trán).
-QUY TẮC VÀNG: mỗi ý nói ra có đúng MỘT phần tử đồ hoạ hiện đúng giây đó (sai số <0.3s); không nghĩ ra khối phù hợp thì ĐỂ TRỐNG — vài giây chỉ có mặt người và phụ đề là nhịp nghỉ tốt. Luôn đặt "out" (cụm sống 6–12s). "stagger" = đúng nhịp liệt kê trong lời nói. CẤM đặt đồ hoạ vào dải phụ đề y ${kg.capDai[0]}–${kg.capDai[1]} và đè lên thẻ video đang hiện.
+QUY TẮC VÀNG: mỗi ý nói ra có đúng MỘT phần tử đồ hoạ hiện đúng giây đó (sai số <0.3s). SÀN MẬT ĐỘ BẮT BUỘC: không được để quá 7 giây liên tục không có biến cố nào (module mới / đổi khung / từ khoá) — video N giây cần TỐI THIỂU N/7 module, dùng ít nhất 4 LOẠI module khác nhau, không dùng một loại quá 2 lần liên tiếp. Nhịp nghỉ (chỉ mặt người + phụ đề) tối đa 5–7 giây và chỉ 1–2 lần mỗi video. Luôn đặt "out" (cụm sống 6–12s). "stagger" = đúng nhịp liệt kê trong lời nói. CẤM đặt đồ hoạ vào dải phụ đề y ${kg.capDai[0]}–${kg.capDai[1]} và đè lên thẻ video đang hiện.
 Trả THÊM hai trường trong JSON:
 "framing": [{"t": 0, "preset": "hero", "pan_y": 0.42}],
 "do_hoa": [{"module": "rows", "t": 12.0, "out": 20.0, "x": ${kg.le}, "y": 700, "w": ${kg.rongNoiDung}, "stagger": 1.0, "items": [{"text": "…", "icon": "doc"}]}]`;
@@ -351,10 +351,11 @@ async function tuSoat({ thuMuc, thoiLuong }) {
 ${khung.map((k) => `- ${k}`).join('\n')}
 
 Chấm nhanh và trả về DUY NHẤT một JSON:
-{"dat": true/false, "tat_tu_khoa": false, "giam_dong_tac": false, "ghi_chu": "1 câu nhận xét"}
+{"dat": true/false, "tat_tu_khoa": false, "giam_dong_tac": false, "thieu_bien_co": false, "ghi_chu": "1 câu nhận xét"}
 - "tat_tu_khoa": true nếu chữ từ khoá che mặt người/đè lên chữ khác gây rối.
 - "giam_dong_tac": true nếu hiệu ứng chuyển động dày tới mức khó chịu.
-- Nếu ổn: dat=true và hai cờ kia false.`;
+- "thieu_bien_co": true nếu nhiều khung liên tiếp TRỐNG TRƠN — chỉ mặt người và phụ đề, không đồ hoạ nào — video nhìn "mỏng" thiếu đầu tư.
+- Nếu ổn: dat=true và các cờ kia false.`;
   try {
     const ra = await goiClaude(prompt, { coMat: true, gioiHanGiay: 240 });
     return trichJson(ra);
@@ -422,9 +423,15 @@ async function renderKhungHtml({
       const sw = 2 * Math.round((W2 * f.zoom) / 2), sh = 2 * Math.round((H2 * f.zoom) / 2);
       const dai = f.ketThuc - f.batDau;
       const tenSeg = `seg-${hauTo}-${k}.mp4`;
+      // Ken Burns TRONG thẻ: video không bao giờ đứng im — đẩy vào/lùi ra xen kẽ
+      const soFr = Math.max(2, Math.round(dai * 30));
+      const kb = k % 2 === 0
+        ? `zoompan=z='min(1+${(0.07 / soFr).toFixed(6)}*on,1.07)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${W2}x${H2}:fps=30`
+        : `zoompan=z='max(1.07-${(0.07 / soFr).toFixed(6)}*on,1.001)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=${W2}x${H2}:fps=30`;
       const locVideo = [
         `scale=${sw}:${sh}:force_original_aspect_ratio=increase`,
         `crop=${W2}:${H2}:x=(iw-${W2})/2:y=(ih-${H2})*${f.panY.toFixed(2)}`,
+        kb,
         ...(mau ? [mau] : []), 'setsar=1',
       ].join(',');
       await ffmpeg([
@@ -1041,7 +1048,19 @@ export async function chayViec(viec, ganBuoc) {
   let ketSoat = null;
   if (process.env.XUONG_TU_SOAT !== '0' && edl.nguon === 'claude' && process.env.XUONG_BO_QUA_CLAUDE !== '1') {
     ketSoat = await tuSoat({ thuMuc, thoiLuong: kq.thoiLuong });
-    if (ketSoat && ketSoat.dat === false && (ketSoat.tat_tu_khoa || ketSoat.giam_dong_tac)) {
+    if (ketSoat && ketSoat.dat === false && (ketSoat.tat_tu_khoa || ketSoat.giam_dong_tac || ketSoat.thieu_bien_co)) {
+      if (ketSoat.thieu_bien_co && cheDoHtml) {
+        // màn hình trống quá lâu → tự đắp thêm biến cố từ chương/từ khoá đã có
+        const kg = KHONG_GIAN[khongGian];
+        const daCo = new Set(edl.els.map((e) => Math.round(e.t)));
+        let them = 0;
+        for (const ch of edl.chuong) {
+          if (them >= 4 || daCo.has(Math.round(ch.giay))) continue;
+          edl.els.push({ module: 'tag', text: ch.ten.slice(0, 28), t: Math.round(ch.giay * 10) / 10,
+            out: Math.min(ch.giay + 6, sauCat.thoiLuong), x: kg.le, y: 34, w: 'auto' });
+          them++;
+        }
+      }
       if (ketSoat.tat_tu_khoa) {
         edl.tuKhoa = [];
         if (cheDoHtml) edl.els = edl.els.filter((e) => !['bigtype', 'note'].includes(e.module));

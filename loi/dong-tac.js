@@ -11,7 +11,7 @@ export const CAC_DONG_TAC = ['tinh', 'push-in', 'pull-out', 'pan-trai', 'pan-pha
  */
 export function locDongTac(dongTac, { daiGiay, cuongDo = 0.7, rong, cao, fps = 30 }) {
   const soFrame = Math.max(2, Math.round(daiGiay * fps));
-  const zMax = (1 + 0.06 + 0.12 * cuongDo).toFixed(4); // 1.06 → 1.18
+  const zMax = (1 + 0.08 + 0.14 * cuongDo).toFixed(4); // 1.08 → 1.22 — đậm tay hơn
   const kich = `s=${rong}x${cao}`;
   const giua = `x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'`;
 
@@ -25,7 +25,7 @@ export function locDongTac(dongTac, { daiGiay, cuongDo = 0.7, rong, cao, fps = 3
     case 'pan-phai':
       return `zoompan=z=1.10:x='(iw-iw/zoom)*(on/${soFrame})':y='ih/2-(ih/zoom/2)':d=1:${kich}:fps=${fps}`;
     case 'punch-in': { // cắt phóng đột ngột — scale tĩnh, KHÔNG mượt (chủ đích)
-      const ti = (1 + 0.10 + 0.08 * cuongDo).toFixed(3);
+      const ti = (1 + 0.12 + 0.10 * cuongDo).toFixed(3);
       return `scale=trunc(iw*${ti}/2)*2:trunc(ih*${ti}/2)*2,crop=${rong}:${cao}:(iw-${rong})/2:(ih-${cao})/2`;
     }
     case 'rung': { // giật tắt dần trong ~12 frame đầu
