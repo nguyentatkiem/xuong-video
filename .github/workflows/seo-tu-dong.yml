@@ -1,0 +1,59 @@
+# Dựng lại site + chấm điểm SEO mỗi tuần, và (nếu có khóa API) để AI viết bài mới.
+# Chạy tay: tab Actions → "SEO tự động" → Run workflow.
+name: SEO tự động
+
+on:
+  schedule:
+    - cron: '0 1 * * 1' # 08:00 thứ Hai giờ Việt Nam
+  workflow_dispatch:
+    inputs:
+      so-bai:
+        description: 'Số bài viết mới AI sẽ viết (0 = chỉ dựng + soát)'
+        default: '0'
+      chu-de:
+        description: 'Chủ đề bổ sung từ khóa khi hàng đợi cạn'
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  cham-soc-web:
+    runs-on: ubuntu-latest
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Dựng site và soát SEO
+        run: |
+          node xuong-web/cli.js dung
+          node xuong-web/cli.js seo soat
+
+      # Chỉ chạy khi repo có secret ANTHROPIC_API_KEY
+      - name: Vòng SEO tự động (AI)
+        if: ${{ env.ANTHROPIC_API_KEY != '' && github.event_name == 'workflow_dispatch' }}
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          node xuong-web/cli.js seo tu-dong \
+            --so-bai "${{ github.event.inputs.so-bai || 0 }}" \
+            --chu-de "${{ github.event.inputs.chu-de }}"
+
+      - name: Tóm tắt báo cáo
+        run: cat du-lieu/seo/soat-moi-nhat.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Commit thay đổi (nếu có)
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add trang-web
+          if git diff --cached --quiet; then
+            echo 'Không có thay đổi nào.'
+          else
+            git commit -m 'chore(web): dựng lại site + cập nhật SEO tự động'
+            git push
+          fi

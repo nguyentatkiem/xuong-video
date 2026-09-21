@@ -1,0 +1,79 @@
+{
+  "ten": "Nguyễn Tất Kiểm",
+  "khauHieu": "Kiến tạo doanh nghiệp thời AI",
+  "moTaNgan": "Làm chủ AI. Làm chủ tương lai.",
+  "tenMien": "https://nguyentatkiem.com",
+  "ngonNgu": "vi",
+  "mucTieu": "Chuyên gia đào tạo, cố vấn doanh nghiệp và nhà truyền cảm hứng về ứng dụng AI cho doanh nghiệp Việt Nam.",
+  "thuongHieu": {
+    "chinh": "#1560d4",
+    "dam": "#0b3f96",
+    "sang": "#eaf2ff",
+    "muc": "#0c1a33",
+    "nhan": "#f4b23f"
+  },
+  "lienHe": {
+    "email": "nguyentatkiem@gmail.com",
+    "dienThoai": "(+84) 912 345 678",
+    "web": "NGUYENTATKIEM.COM",
+    "diaChi": "Hà Nội & TP. Hồ Chí Minh"
+  },
+  "mangXaHoi": [
+    { "ten": "YouTube", "bieuTuong": "youtube", "lien": "https://youtube.com/@nguyentatkiem" },
+    { "ten": "Facebook", "bieuTuong": "facebook", "lien": "https://facebook.com/nguyentatkiem" },
+    { "ten": "LinkedIn", "bieuTuong": "linkedin", "lien": "https://linkedin.com/in/nguyentatkiem" },
+    { "ten": "TikTok", "bieuTuong": "tiktok", "lien": "https://tiktok.com/@nguyentatkiem" }
+  ],
+  "menu": [
+    { "ten": "Giới thiệu", "lien": "/#gioi-thieu" },
+    { "ten": "Chương trình đào tạo", "lien": "/#khoa-hoc" },
+    { "ten": "Cộng đồng", "lien": "/#cong-dong" },
+    { "ten": "Tài nguyên", "lien": "/#tai-nguyen" },
+    { "ten": "Blog", "lien": "/blog/" },
+    { "ten": "Liên hệ", "lien": "/#lien-he" }
+  ],
+  "nutChinh": { "ten": "Đăng ký tư vấn", "lien": "/#lien-he" },
+  "chanTrang": {
+    "cot": [
+      {
+        "ten": "Khám phá",
+        "muc": [
+          { "ten": "Giới thiệu", "lien": "/#gioi-thieu" },
+          { "ten": "Khóa học", "lien": "/#khoa-hoc" },
+          { "ten": "Sự kiện", "lien": "/#su-kien" }
+        ]
+      },
+      {
+        "ten": "Theo dõi",
+        "muc": [
+          { "ten": "Blog", "lien": "/blog/" },
+          { "ten": "Cộng đồng", "lien": "/#cong-dong" },
+          { "ten": "Liên hệ", "lien": "/#lien-he" }
+        ]
+      }
+    ],
+    "chuKy": "Một người. Vạn khả năng.\nCùng kiến tạo tương lai.",
+    "banQuyen": "© 2026 Nguyễn Tất Kiểm. Tất cả quyền được bảo lưu.",
+    "phapLy": [
+      { "ten": "Chính sách bảo mật", "lien": "/chinh-sach-bao-mat.html" },
+      { "ten": "Điều khoản sử dụng", "lien": "/dieu-khoan-su-dung.html" }
+    ],
+    "ghiChu": "Thiết kế bởi AI × Human"
+  },
+  "seo": {
+    "tuKhoaGoc": [
+      "đào tạo AI cho doanh nghiệp",
+      "công ty 1 người",
+      "SOLO AI CEO",
+      "ứng dụng AI vào kinh doanh",
+      "Nguyễn Tất Kiểm"
+    ],
+    "anhChiaSe": "/tai-nguyen/anh/og-mac-dinh.svg",
+    "loaiNoiDung": "website",
+    "phanTich": {
+      "ga4": "",
+      "gtm": "",
+      "facebookPixel": ""
+    }
+  }
+}

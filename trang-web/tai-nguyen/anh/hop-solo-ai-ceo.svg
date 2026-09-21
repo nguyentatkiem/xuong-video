@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 420" width="420" height="420" role="img"><defs><linearGradient id="n" gradientTransform="rotate(150)">
+  <stop offset="0%" stop-color="#e8f1ff"/><stop offset="100%" stop-color="#c9ddff"/></linearGradient><linearGradient id="h" gradientTransform="rotate(135)">
+  <stop offset="0%" stop-color="#06214f"/><stop offset="100%" stop-color="#1560d4"/></linearGradient></defs>
+  <rect width="420" height="420" fill="url(#n)" rx="18"/>
+  <g transform="translate(96 54)">
+    <rect x="0" y="0" width="190" height="300" rx="12" fill="url(#h)"/>
+    <rect x="0" y="0" width="26" height="300" rx="12" fill="#ffffff22"/>
+    <text x="108" y="108" fill="#fff" opacity="1" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="34" font-weight="800" text-anchor="middle">SOLO</text>
+    <text x="108" y="146" fill="#fff" opacity="1" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="34" font-weight="800" text-anchor="middle">AI CEO</text>
+    <text x="108" y="186" fill="#fff" opacity="0.85" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="13" font-weight="500" text-anchor="middle">XÂY CÔNG TY 1 NGƯỜI</text>
+    <text x="108" y="206" fill="#fff" opacity="0.85" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="13" font-weight="500" text-anchor="middle">VỚI AI</text>
+    <circle cx="108" cy="250" r="30" fill="#ffffff22"/>
+    <g fill="#ffffff" opacity="0.25">
+    <circle cx="108" cy="90" r="33.48"/>
+    <path d="M29.322000000000003 300 c0-90 30.131999999999998-108 78.678-108
+             s78.678 18 78.678 108z"/>
+  </g>
+  </g>
+  <text x="210" y="406" fill="#fff" opacity="0.5" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="11.76" font-weight="500" text-anchor="middle">ẢNH MẪU — thay bằng ảnh thật</text></svg>

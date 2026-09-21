@@ -1,0 +1,18 @@
+{
+  "slug": "chinh-sach-bao-mat",
+  "tep": "chinh-sach-bao-mat.html",
+  "tieuDe": "Chính sách bảo mật | Nguyễn Tất Kiểm",
+  "moTa": "Cách website nguyentatkiem.com thu thập, sử dụng và bảo vệ thông tin cá nhân của người để lại đăng ký tư vấn và người truy cập.",
+  "tuKhoa": [
+    "chính sách bảo mật",
+    "bảo vệ dữ liệu cá nhân"
+  ],
+  "uuTien": "0.3",
+  "khoi": [
+    {
+      "loai": "noiDungTho",
+      "tieuDe": "Chính sách bảo mật",
+      "html": "<p>Trang này mô tả cách chúng tôi xử lý thông tin bạn cung cấp khi truy cập website và đăng ký tư vấn.</p><h2>1. Thông tin thu thập</h2><ul><li>Thông tin bạn tự điền: họ tên, số điện thoại, email, nhu cầu tư vấn.</li><li>Thông tin kỹ thuật ẩn danh: trang đã xem, nguồn truy cập, loại thiết bị (qua công cụ đo lường nếu được bật).</li></ul><h2>2. Mục đích sử dụng</h2><ul><li>Liên hệ tư vấn chương trình đào tạo phù hợp với bạn.</li><li>Gửi tài liệu, thông tin khóa học và sự kiện mà bạn đã đồng ý nhận.</li><li>Cải thiện nội dung và trải nghiệm của website.</li></ul><h2>3. Chia sẻ thông tin</h2><p>Chúng tôi không bán, không trao đổi thông tin cá nhân của bạn với bên thứ ba vì mục đích thương mại. Thông tin chỉ được chia sẻ khi có yêu cầu hợp pháp của cơ quan nhà nước có thẩm quyền, hoặc với đơn vị kỹ thuật phục vụ việc vận hành website theo thỏa thuận bảo mật.</p><h2>4. Lưu trữ và bảo vệ</h2><p>Thông tin đăng ký được lưu trên hệ thống nội bộ, chỉ những người phụ trách tư vấn mới được truy cập. Chúng tôi lưu dữ liệu trong thời gian cần thiết cho mục đích tư vấn và chăm sóc học viên.</p><h2>5. Quyền của bạn</h2><p>Bạn có quyền yêu cầu xem, chỉnh sửa hoặc xóa thông tin cá nhân của mình bằng cách liên hệ qua email hoặc số điện thoại ở chân trang. Chúng tôi xử lý yêu cầu trong vòng 7 ngày làm việc.</p><h2>6. Cập nhật chính sách</h2><p>Chính sách có thể được cập nhật để phù hợp với quy định pháp luật và thực tế vận hành. Phiên bản mới nhất luôn được đăng tại trang này.</p>"
+    }
+  ]
+}

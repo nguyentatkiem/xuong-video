@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xưởng Web — Bảng điều khiển</title>
+<style>
+  :root{
+    --chinh:#1560d4; --dam:#0b3f96; --sang:#eaf2ff; --muc:#0c1a33;
+    --xam:#5b6b85; --vien:#dbe6f7; --nen:#f4f8ff; --do:#d9412f; --vang:#c07a08; --xanh:#127a4b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--nen);color:var(--muc);font:15px/1.55 "Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif}
+  header{background:linear-gradient(120deg,var(--dam),var(--chinh));color:#fff;padding:22px 28px}
+  header h1{margin:0;font-size:20px;letter-spacing:.2px}
+  header p{margin:4px 0 0;opacity:.85;font-size:13px}
+  main{padding:24px;max-width:1240px;margin:0 auto;display:grid;gap:18px}
+  .hang{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+  .the{background:#fff;border:1px solid var(--vien);border-radius:16px;padding:18px 20px}
+  .the h2{margin:0 0 12px;font-size:15px;text-transform:uppercase;letter-spacing:.6px;color:var(--xam)}
+  .diem{font-size:44px;font-weight:800;line-height:1;color:var(--chinh)}
+  .diem small{font-size:14px;color:var(--xam);font-weight:500}
+  .chi-so{display:flex;gap:18px;margin-top:10px;flex-wrap:wrap}
+  .chi-so div{background:var(--sang);border-radius:10px;padding:8px 12px;font-size:13px}
+  .chi-so b{display:block;font-size:18px}
+  button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:9px 14px;background:var(--chinh);color:#fff;cursor:pointer}
+  button.phu{background:#fff;color:var(--chinh);border:1px solid var(--chinh)}
+  button:disabled{opacity:.55;cursor:progress}
+  input,textarea{font:inherit;width:100%;padding:9px 11px;border:1px solid var(--vien);border-radius:10px;background:#fff;margin:6px 0 10px}
+  label{font-size:13px;color:var(--xam);font-weight:600}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--vien);vertical-align:top}
+  th{color:var(--xam);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+  .tag{display:inline-block;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600}
+  .tag.tot{background:#e3f6ec;color:var(--xanh)} .tag.vua{background:#fdf1dc;color:var(--vang)} .tag.te{background:#fdeae7;color:var(--do)}
+  .nhat-ky{background:#0c1a33;color:#c9e0ff;border-radius:12px;padding:14px;font:12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;max-height:260px;overflow:auto;white-space:pre-wrap}
+  .hang-nut{display:flex;gap:10px;flex-wrap:wrap}
+  a{color:var(--chinh)}
+  ul.gon{margin:0;padding-left:18px;font-size:13.5px;color:var(--xam)}
+</style>
+</head>
+<body>
+<header>
+  <h1>Xưởng Web — Bảng điều khiển</h1>
+  <p data-site>Đang tải…</p>
+</header>
+<main>
+  <div class="hang">
+    <section class="the">
+      <h2>Điểm SEO</h2>
+      <p class="diem"><span data-diem>–</span><small>/100</small></p>
+      <div class="chi-so">
+        <div>Trang<b data-so-trang>–</b></div>
+        <div>Lỗi<b data-so-loi>–</b></div>
+        <div>Nhắc<b data-so-nhac>–</b></div>
+      </div>
+    </section>
+    <section class="the">
+      <h2>Thao tác nhanh</h2>
+      <div class="hang-nut">
+        <button data-lenh="dung">Dựng lại site</button>
+        <button class="phu" data-lenh="soat">Soát SEO</button>
+        <button class="phu" onclick="window.open('/','_blank')">Xem website</button>
+      </div>
+      <p style="margin:12px 0 0;font-size:13px;color:var(--xam)">Sau khi sửa tệp trong <code>trang-web/noi-dung/</code>, bấm “Dựng lại site”.</p>
+    </section>
+    <section class="the">
+      <h2>SEO tự động</h2>
+      <label>Chủ đề bổ sung từ khóa (tuỳ chọn)</label>
+      <input data-chu-de placeholder="AI cho phòng marketing">
+      <label>Số bài viết mới</label>
+      <input data-so-bai type="number" min="0" max="5" value="1">
+      <button data-lenh="tu-dong">Chạy vòng tự động</button>
+    </section>
+  </div>
+
+  <div class="hang">
+    <section class="the">
+      <h2>Tạo landing page</h2>
+      <label>Mô tả landing (AI sẽ viết nội dung)</label>
+      <textarea data-brief rows="3" placeholder="Khóa AI Sales 3 buổi cho chủ shop online, học phí ưu đãi, có thực hành"></textarea>
+      <button data-lenh="landing">Tạo landing</button>
+    </section>
+    <section class="the">
+      <h2>Viết bài chuẩn SEO</h2>
+      <label>Từ khóa chính</label>
+      <input data-tu-khoa placeholder="AI Agent chăm sóc khách hàng">
+      <button data-lenh="bai-viet">Viết bài</button>
+      <p style="margin:10px 0 0;font-size:13px;color:var(--xam)">Bài được lưu vào <code>noi-dung/blog/</code> rồi dựng ra <code>/blog/</code>.</p>
+    </section>
+    <section class="the">
+      <h2>Kế hoạch từ khóa</h2>
+      <label>Lập kế hoạch cho chủ đề</label>
+      <input data-chu-de-tk placeholder="công ty 1 người">
+      <button class="phu" data-lenh="tu-khoa">Lập kế hoạch</button>
+      <p style="margin:10px 0 0"><span data-tk-cho>–</span> cụm đang chờ viết / <span data-tk-tong>–</span> tổng</p>
+    </section>
+  </div>
+
+  <section class="the">
+    <h2>Trang &amp; điểm từng trang</h2>
+    <table><thead><tr><th>URL</th><th>Điểm</th><th>Từ</th><th>Vấn đề cần xử lý</th></tr></thead>
+      <tbody data-bang-trang><tr><td colspan="4">Đang tải…</td></tr></tbody>
+    </table>
+  </section>
+
+  <div class="hang">
+    <section class="the">
+      <h2>Đăng ký tư vấn gần đây</h2>
+      <table><thead><tr><th>Họ tên</th><th>Điện thoại</th><th>Nhu cầu</th></tr></thead>
+        <tbody data-bang-dang-ky><tr><td colspan="3">Chưa có đăng ký nào.</td></tr></tbody>
+      </table>
+    </section>
+    <section class="the">
+      <h2>Nhật ký</h2>
+      <div class="nhat-ky" data-nhat-ky>Sẵn sàng.</div>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const nhatKy = (chu) => {
+  const o = $('[data-nhat-ky]');
+  o.textContent = `[${new Date().toLocaleTimeString('vi-VN')}] ${chu}\n` + o.textContent;
+};
+const hangDiem = (d) => d >= 90 ? 'tot' : d >= 70 ? 'vua' : 'te';
+
+async function goi(duong, than) {
+  const res = await fetch(duong, than ? {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(than),
+  } : { method: 'POST' });
+  const dl = await res.json();
+  if (dl.ok === false) throw new Error(dl.loi || 'Lỗi không rõ');
+  return dl;
+}
+
+async function napTongQuan() {
+  const dl = await (await fetch('/api/tong-quan')).json();
+  $('[data-site]').textContent = `${dl.site.ten} · ${dl.site.tenMien} · ${dl.noiDung.trang.length} trang nguồn · ${dl.noiDung.bai.length} bài blog`;
+  $('[data-diem]').textContent = dl.seo.diem;
+  $('[data-so-trang]').textContent = dl.seo.soTrang;
+  $('[data-so-loi]').textContent = dl.seo.soLoi;
+  $('[data-so-nhac]').textContent = dl.seo.soNhac;
+  $('[data-tk-cho]').textContent = dl.tuKhoa.cho;
+  $('[data-tk-tong]').textContent = dl.tuKhoa.tong;
+
+  $('[data-bang-trang]').innerHTML = dl.seo.trang.map((t) => `<tr>
+    <td><a href="${t.url}" target="_blank">${t.url}</a></td>
+    <td><span class="tag ${hangDiem(t.diem)}">${t.diem}</span></td>
+    <td>${t.soTu}</td>
+    <td><ul class="gon">${[...t.loi.map((v) => `<li>❌ ${v.thongDiep}</li>`), ...t.nhac.map((v) => `<li>⚠️ ${v.thongDiep}</li>`)].join('') || '<li>Không có vấn đề</li>'}</ul></td>
+  </tr>`).join('');
+
+  $('[data-bang-dang-ky]').innerHTML = dl.dangKy.length
+    ? dl.dangKy.map((d) => `<tr><td>${d.ten}</td><td>${d.dienThoai}</td><td>${d.nhuCau || ''}</td></tr>`).join('')
+    : '<tr><td colspan="3">Chưa có đăng ký nào.</td></tr>';
+}
+
+const viec = {
+  dung: async () => { const r = await goi('/api/dung'); return `Đã dựng ${r.soTrang} trang.`; },
+  soat: async () => { const r = await goi('/api/soat'); return `Điểm SEO ${r.diem}/100 — ${r.soLoi} lỗi, ${r.soNhac} nhắc.`; },
+  'tu-dong': async () => {
+    const r = await goi('/api/tu-dong', { chuDe: $('[data-chu-de]').value.trim(), soBai: Number($('[data-so-bai]').value || 0) });
+    return `Vòng tự động xong sau ${r.giay}s: điểm ${r.diemTruoc} → ${r.diemSau}, ${r.baiMoi.length} bài mới, ${r.metaSua.length} meta sửa.`
+      + (r.loi.length ? ` Lưu ý: ${r.loi.join('; ')}` : '');
+  },
+  landing: async () => {
+    const brief = $('[data-brief]').value.trim();
+    if (!brief) throw new Error('Cần mô tả landing page.');
+    const r = await goi('/api/landing', { brief });
+    return `Đã tạo landing /landing/${r.slug}.html (nguồn: ${r.nguon}).`;
+  },
+  'bai-viet': async () => {
+    const tuKhoa = $('[data-tu-khoa]').value.trim();
+    if (!tuKhoa) throw new Error('Cần từ khóa.');
+    const r = await goi('/api/bai-viet', { tuKhoa });
+    return `Đã viết "${r.tieuDe}" (${r.soTu} từ) → /blog/${r.slug}.html`;
+  },
+  'tu-khoa': async () => {
+    const chuDe = $('[data-chu-de-tk]').value.trim();
+    if (!chuDe) throw new Error('Cần chủ đề.');
+    const r = await goi('/api/tu-khoa', { chuDe });
+    return `Thêm ${r.them} cụm từ khóa, tổng ${r.tong}.`;
+  },
+};
+
+document.querySelectorAll('[data-lenh]').forEach((nut) => {
+  nut.addEventListener('click', async () => {
+    const ten = nut.dataset.lenh;
+    const chu = nut.textContent;
+    nut.disabled = true; nut.textContent = 'Đang chạy…';
+    nhatKy(`▸ ${ten}…`);
+    try {
+      nhatKy(await viec[ten]());
+      await napTongQuan();
+    } catch (e) {
+      nhatKy(`❌ ${e.message}`);
+    } finally {
+      nut.disabled = false; nut.textContent = chu;
+    }
+  });
+});
+
+napTongQuan().catch((e) => nhatKy(`❌ ${e.message}`));
+</script>
+</body>
+</html>

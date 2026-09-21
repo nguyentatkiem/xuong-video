@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img"><defs><linearGradient id="n" gradientTransform="rotate(120)">
+  <stop offset="0%" stop-color="#06214f"/><stop offset="100%" stop-color="#1560d4"/></linearGradient><pattern id="l" width="40" height="40" patternUnits="userSpaceOnUse">
+  <path d="M40 0H0V40" fill="none" stroke="#ffffff22" stroke-width="1"/></pattern></defs>
+  <rect width="1200" height="630" fill="url(#n)"/><rect width="1200" height="630" fill="url(#l)"/>
+  <text x="80" y="250" fill="#fff" opacity="0.8" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="26" font-weight="600" text-anchor="start">LÀM CHỦ AI. LÀM CHỦ TƯƠNG LAI.</text>
+  <text x="80" y="330" fill="#fff" opacity="1" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="62" font-weight="800" text-anchor="start">THIẾT LẬP CÔNG TY 1 NGƯỜI</text>
+  <text x="80" y="404" fill="#93c0ff" opacity="1" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="62" font-weight="800" text-anchor="start">TRONG KỶ NGUYÊN AI</text>
+  <text x="80" y="470" fill="#fff" opacity="0.75" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="24" font-weight="500" text-anchor="start">nguyentatkiem.com</text></svg>

@@ -1,0 +1,148 @@
+{
+  "slug": "solo-ai-ceo",
+  "tep": "landing/solo-ai-ceo.html",
+  "tieuDe": "SOLO AI CEO — Xây công ty 1 người với AI | Nguyễn Tất Kiểm",
+  "moTa": "Khóa học SOLO AI CEO hướng dẫn chủ doanh nghiệp dựng hệ thống AI vận hành marketing, sales, content và chăm sóc khách hàng mà không cần mở rộng nhân sự.",
+  "tuKhoa": ["SOLO AI CEO", "khóa học AI cho chủ doanh nghiệp", "công ty 1 người", "AI Agent cho doanh nghiệp"],
+  "uuTien": "0.9",
+  "khoi": [
+    {
+      "loai": "hero",
+      "nhan": "Khóa học đặc biệt",
+      "tieuDe": "SOLO AI CEO",
+      "tieuDeNhan": "xây công ty 1 người với AI",
+      "moTa": "4 tuần dựng xong bộ AI Agent chạy marketing, sales, content và chăm sóc khách hàng cho doanh nghiệp của bạn — bằng chính quy trình bạn đang có.",
+      "nut": [
+        { "ten": "Đăng ký tư vấn", "lien": "#form-tu-van", "kieu": "chinh" },
+        { "ten": "Xem lộ trình học", "lien": "#lo-trinh", "kieu": "phu" }
+      ],
+      "trichDan": "Bạn chỉ cần 1 người. Phần còn lại, hãy để AI làm.",
+      "kyTen": "Nguyễn Tất Kiểm",
+      "anh": "/tai-nguyen/anh/chan-dung-hero.svg",
+      "anhChu": "Nguyễn Tất Kiểm — giảng viên khóa SOLO AI CEO",
+      "vietTay": "Một người\nVạn khả năng",
+      "heSinhThai": {
+        "ten": "Bạn sẽ dựng được",
+        "muc": [
+          { "ten": "AI Marketing Agent", "moTa": "Nội dung & quảng cáo", "bieuTuong": "marketing" },
+          { "ten": "AI Sales Agent", "moTa": "Tư vấn & chốt đơn", "bieuTuong": "sales" },
+          { "ten": "AI Content Agent", "moTa": "Bài, video, hình ảnh", "bieuTuong": "content" },
+          { "ten": "AI CSKH Agent", "moTa": "Trực 24/7", "bieuTuong": "cskh" },
+          { "ten": "AI Data Agent", "moTa": "Báo cáo & gợi ý", "bieuTuong": "analytics" },
+          { "ten": "Bộ automation", "moTa": "Nối các phần lại", "bieuTuong": "auto" }
+        ],
+        "ketLuan": "4 tuần — 5 AI Agent — 1 hệ thống chạy được ngay."
+      }
+    },
+    {
+      "loai": "noiDau",
+      "tieuDe": "Khóa học này dành cho bạn, nếu…",
+      "moTa": "Bạn đang tự làm phần lớn công việc và muốn một hệ thống chạy thay mình, thay vì tuyển thêm người.",
+      "the": [
+        { "ten": "Bạn là founder làm tất cả", "moTa": "Từ content tới chốt đơn đều qua tay bạn.", "bieuTuong": "qua-tai" },
+        { "ten": "Bạn ngại tăng nhân sự", "moTa": "Tuyển thêm là thêm chi phí cố định và rủi ro.", "bieuTuong": "chi-phi" },
+        { "ten": "Bạn đã thử ChatGPT nhưng rời rạc", "moTa": "Dùng theo hứng, chưa thành quy trình lặp lại được.", "bieuTuong": "marketing" },
+        { "ten": "Bạn muốn scale nhưng thiếu hệ thống", "moTa": "Doanh thu tăng thì bạn càng bận hơn.", "bieuTuong": "tang-truong" }
+      ],
+      "trichDan": "Không phải bạn cần nhiều hơn, mà là đúng cách hơn. Với AI, 1 người cũng có thể xây dựng doanh nghiệp lớn.",
+      "kyTen": "Nguyễn Tất Kiểm",
+      "anh": "/tai-nguyen/anh/chan-dung-trich-dan.svg",
+      "anhChu": "Nguyễn Tất Kiểm nói về mô hình công ty 1 người"
+    },
+    {
+      "loai": "loTrinh",
+      "id": "lo-trinh",
+      "tieuDe": "Lộ trình 4 tuần",
+      "moTa": "Mỗi tuần một phần của hệ thống, học tới đâu dựng tới đó trên chính doanh nghiệp của bạn.",
+      "buoc": [
+        { "ten": "Tuần 1 — AI First Mindset & bản đồ công việc", "moTa": "Liệt kê toàn bộ đầu việc đang tốn thời gian, phân loại việc nào giao cho AI, việc nào giữ lại. Kết quả: bản đồ tự động hóa của riêng bạn." },
+        { "ten": "Tuần 2 — Dựng AI Agent cho marketing & content", "moTa": "Bộ prompt và quy trình sản xuất nội dung đều đặn: bài viết, kịch bản video, hình ảnh, lịch đăng. Kết quả: kênh chạy không cần bạn ngồi viết." },
+        { "ten": "Tuần 3 — AI Agent cho sales & chăm sóc khách hàng", "moTa": "Kịch bản tư vấn, phân loại lead, trả lời 24/7, nhắc lịch và nuôi dưỡng khách cũ. Kết quả: không bỏ sót khách hàng nào." },
+        { "ten": "Tuần 4 — Nối hệ thống & đo lường", "moTa": "Ghép các agent bằng automation, dựng bảng số liệu theo tuần và quy trình cải tiến. Kết quả: hệ thống chạy và tự báo cáo." }
+      ]
+    },
+    {
+      "loai": "khoaHocChinh",
+      "nhan": "Nội dung khóa học",
+      "tieuDe": "4 trụ cột của SOLO AI CEO",
+      "moTa": "Học để dựng được hệ thống thật, không dừng ở lý thuyết công cụ.",
+      "tru": [
+        { "ten": "AI First Mindset", "moTa": "Tư duy đúng trong kỷ nguyên AI", "bieuTuong": "mindset" },
+        { "ten": "Thiết kế AI Workflow", "moTa": "Xây dựng quy trình tự động hóa hoàn chỉnh", "bieuTuong": "workflow" },
+        { "ten": "Xây AI Agent cho từng phòng ban", "moTa": "Marketing, sales, content, CSKH", "bieuTuong": "agent" },
+        { "ten": "Scale hệ thống tăng trưởng", "moTa": "Từ 1 người, xây doanh nghiệp bền vững", "bieuTuong": "scale" }
+      ],
+      "loiIch": {
+        "ten": "Bạn sẽ nhận được",
+        "muc": [
+          "Lộ trình học bài bản từ A–Z",
+          "Mẫu prompt + workflow thực chiến",
+          "Case study & công cụ đã được kiểm chứng",
+          "Hỗ trợ triển khai sau khóa học",
+          "Cộng đồng học viên và các buổi hỏi đáp định kỳ"
+        ],
+        "nut": { "ten": "Đăng ký tư vấn", "lien": "#form-tu-van" }
+      },
+      "hop": {
+        "anh": "/tai-nguyen/anh/hop-solo-ai-ceo.svg",
+        "anhChu": "Bộ khóa học SOLO AI CEO"
+      }
+    },
+    {
+      "loai": "camNhan",
+      "tieuDe": "Học viên đã làm được gì?",
+      "moTa": "Một số chia sẻ tiêu biểu sau khi đưa hệ thống AI vào vận hành.",
+      "nut": { "ten": "Xem thêm câu chuyện", "lien": "/blog/" },
+      "the": [
+        { "noiDung": "Sau khóa học, tôi đã tự xây được hệ thống marketing tự động, tiết kiệm 70% thời gian và doanh thu tăng gấp 3.", "ten": "Trần Minh Hoàng", "chucDanh": "Founder — Thương hiệu thời trang", "sao": 5, "anh": "/tai-nguyen/anh/hoc-vien-1.svg" },
+        { "noiDung": "Kiến thức rất thực tế, áp dụng ngay được. Tôi có cả team AI làm việc 24/7 cho doanh nghiệp của mình.", "ten": "Nguyễn Thị Lan", "chucDanh": "CEO — Spa & Beauty", "sao": 5, "anh": "/tai-nguyen/anh/hoc-vien-2.svg" },
+        { "noiDung": "Từ 1 người làm tất cả, hiện tại hệ thống AI vận hành ổn định, tôi có thời gian cho chiến lược lớn hơn.", "ten": "Lê Quốc Huy", "chucDanh": "Founder — E-commerce", "sao": 5, "anh": "/tai-nguyen/anh/hoc-vien-3.svg" },
+        { "noiDung": "Khóa học thay đổi hoàn toàn tư duy của tôi. AI không khó như tôi nghĩ, quan trọng là có người chỉ đúng cách.", "ten": "Phạm Thu Hà", "chucDanh": "Freelancer — Content Creator", "sao": 5, "anh": "/tai-nguyen/anh/hoc-vien-4.svg" }
+      ],
+      "video": {
+        "ten": "Video cảm nhận học viên",
+        "chinh": { "ten": "Từ 1 người đến doanh thu gấp 3 lần", "thoiLuong": "08:24", "anh": "/tai-nguyen/anh/video-1.svg", "lien": "https://youtube.com/@nguyentatkiem" },
+        "phu": [
+          { "ten": "Tự động hóa 80% công việc", "thoiLuong": "06:15", "anh": "/tai-nguyen/anh/video-2.svg", "lien": "https://youtube.com/@nguyentatkiem" },
+          { "ten": "Cuộc sống tự do hơn nhờ AI", "thoiLuong": "05:48", "anh": "/tai-nguyen/anh/video-3.svg", "lien": "https://youtube.com/@nguyentatkiem" }
+        ]
+      }
+    },
+    {
+      "loai": "faq",
+      "tieuDe": "Câu hỏi trước khi đăng ký",
+      "moTa": "Những điều học viên hay hỏi nhất về SOLO AI CEO.",
+      "muc": [
+        { "hoi": "Tôi chưa từng dùng AI, có theo kịp không?", "dap": "Có. Tuần 1 bắt đầu từ tư duy và thao tác cơ bản, mọi quy trình đều có mẫu sẵn để bạn sao chép rồi chỉnh theo doanh nghiệp mình." },
+        { "hoi": "Khóa học mất bao nhiêu thời gian mỗi tuần?", "dap": "Khoảng 3–4 giờ: một buổi học và phần thực hành trên chính công việc bạn đang làm, nên không tạo thêm việc mới." },
+        { "hoi": "Tôi cần mua công cụ gì thêm không?", "dap": "Phần lớn nội dung chạy được với các công cụ phổ biến ở gói miễn phí hoặc gói cơ bản. Danh sách công cụ và chi phí ước tính được công bố ngay buổi đầu." },
+        { "hoi": "Học xong có được hỗ trợ tiếp không?", "dap": "Có. Bạn vào cộng đồng học viên, tham gia các buổi hỏi đáp định kỳ và được hỗ trợ khi dựng agent cho doanh nghiệp của mình." },
+        { "hoi": "Doanh nghiệp của tôi rất đặc thù thì sao?", "dap": "Mỗi tuần đều có phần tư vấn theo ngành. Bạn mang đúng quy trình của mình vào lớp để điều chỉnh, thay vì học theo ví dụ chung chung." },
+        { "hoi": "Đăng ký thế nào?", "dap": "Bấm “Đăng ký tư vấn”, để lại số điện thoại. Đội ngũ liên hệ trong 24 giờ làm việc để xác nhận lộ trình và lịch khai giảng gần nhất." }
+      ],
+      "hoTro": {
+        "ten": "Cần tư vấn thêm?",
+        "moTa": "Đội ngũ sẽ giúp bạn xác định hệ thống AI phù hợp với quy mô và ngành của mình.",
+        "nut": { "ten": "Nhận tư vấn 1:1", "lien": "#form-tu-van" }
+      }
+    },
+    {
+      "loai": "keuGoi",
+      "tieuDe": "Bắt đầu xây công ty 1 người của bạn",
+      "moTa": "Để lại thông tin, đội ngũ sẽ tư vấn lộ trình và lịch khai giảng gần nhất.",
+      "anh": "/tai-nguyen/anh/chan-dung-cta.svg",
+      "nut": [
+        { "ten": "Đăng ký tư vấn", "lien": "#form-tu-van", "kieu": "chinh" },
+        { "ten": "Nhận tài liệu miễn phí", "lien": "#form-tu-van", "kieu": "phu" }
+      ],
+      "loiIch": [
+        "Tư vấn 1:1 cùng đội ngũ",
+        "Giải đáp mọi thắc mắc",
+        "Gợi ý lộ trình phù hợp",
+        "Đồng hành sau khóa học"
+      ],
+      "vietTay": "Hành động hôm nay,\ncho một tương lai khác biệt!",
+      "kyTen": "Nguyễn Tất Kiểm"
+    }
+  ]
+}

@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "node server/index.js",
+    "web": "node xuong-web/cli.js dung",
+    "web:dev": "node xuong-web/cli.js xem",
+    "web:seo": "node xuong-web/cli.js seo soat",
+    "web:tu-dong": "node xuong-web/cli.js seo tu-dong",
     "test": "node --test test/*.test.js"
   },
   "dependencies": {

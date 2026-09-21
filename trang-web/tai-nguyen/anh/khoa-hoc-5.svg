@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 245" width="560" height="245" role="img"><defs><linearGradient id="n" gradientTransform="rotate(120)">
+  <stop offset="0%" stop-color="#06214f"/><stop offset="100%" stop-color="#1560d4"/></linearGradient><pattern id="l" width="22" height="22" patternUnits="userSpaceOnUse">
+  <path d="M22 0H0V22" fill="none" stroke="#ffffff22" stroke-width="1"/></pattern></defs>
+  <rect width="560" height="245" fill="url(#n)"/><rect width="560" height="245" fill="url(#l)"/>
+  <g fill="none" stroke="#ffffff55" stroke-width="1.6">
+      <path d="M280 62l70 40v80l-70 40-70-40v-80z"/><path d="M280 62v80l70 40M280 142l-70 40"/></g>
+  <text x="280" y="211" fill="#fff" opacity="1" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="26" font-weight="700" text-anchor="middle">AI SUPERBUILDER</text></svg>

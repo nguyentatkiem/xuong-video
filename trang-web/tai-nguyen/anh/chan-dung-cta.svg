@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 320" width="240" height="320" role="img"><defs><linearGradient id="n" gradientTransform="rotate(135)">
+  <stop offset="0%" stop-color="#0b3f96"/><stop offset="100%" stop-color="#4a90f0"/></linearGradient><pattern id="l" width="28" height="28" patternUnits="userSpaceOnUse">
+  <path d="M28 0H0V28" fill="none" stroke="#ffffff22" stroke-width="1"/></pattern></defs>
+  <rect width="240" height="320" fill="url(#n)"/>
+  <rect width="240" height="320" fill="url(#l)"/>
+  <circle cx="120" cy="134.4" r="100.8" fill="#ffffff14"/>
+  <g fill="#ffffff" opacity="0.92">
+    <circle cx="120" cy="96" r="37.2"/>
+    <path d="M32.579999999999984 320 c0-96 33.480000000000004-115.19999999999999 87.42000000000002-115.19999999999999
+             s87.42000000000002 19.2 87.42000000000002 115.19999999999999z"/>
+  </g>
+  
+  <text x="120" y="306" fill="#fff" opacity="0.5" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="10" font-weight="500" text-anchor="middle">ẢNH MẪU — thay bằng ảnh thật</text></svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300" role="img"><defs><linearGradient id="n" gradientTransform="rotate(160)">
+  <stop offset="0%" stop-color="#0b3f96"/><stop offset="100%" stop-color="#4a90f0"/></linearGradient><pattern id="l" width="20" height="20" patternUnits="userSpaceOnUse">
+  <path d="M20 0H0V20" fill="none" stroke="#ffffff22" stroke-width="1"/></pattern></defs>
+  <rect width="300" height="300" fill="url(#n)"/><rect width="300" height="300" fill="url(#l)"/>
+  <g fill="#ffffff55"><rect x="70" y="150" width="40" height="80" rx="4"/><rect x="120" y="110" width="46" height="120" rx="4"/>
+       <rect x="176" y="70" width="40" height="160" rx="4"/><path d="M196 70l-2-28-2 28z" fill="#ffffff88"/></g>
+  <text x="150" y="268" fill="#fff" opacity="0.9" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="22" font-weight="700" text-anchor="middle">TP. HCM</text></svg>

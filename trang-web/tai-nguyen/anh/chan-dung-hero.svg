@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 640" width="520" height="640" role="img"><defs><linearGradient id="n" gradientTransform="rotate(135)">
+  <stop offset="0%" stop-color="#0b3f96"/><stop offset="100%" stop-color="#4a90f0"/></linearGradient><pattern id="l" width="28" height="28" patternUnits="userSpaceOnUse">
+  <path d="M28 0H0V28" fill="none" stroke="#ffffff22" stroke-width="1"/></pattern></defs>
+  <rect width="520" height="640" fill="url(#n)"/>
+  <rect width="520" height="640" fill="url(#l)"/>
+  <circle cx="260" cy="268.8" r="218.4" fill="#ffffff14"/>
+  <g fill="#ffffff" opacity="0.92">
+    <circle cx="260" cy="192" r="80.6"/>
+    <path d="M70.59 640 c0-192 72.53999999999999-230.39999999999998 189.41-230.39999999999998
+             s189.41 38.4 189.41 230.39999999999998z"/>
+  </g>
+  <text x="260" y="76.8" fill="#fff" opacity="0.85" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="28.6" font-weight="700" text-anchor="middle">NGUYỄN TẤT KIỂM</text>
+  <text x="260" y="626" fill="#fff" opacity="0.5" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="14.56" font-weight="500" text-anchor="middle">ẢNH MẪU — thay bằng ảnh thật</text></svg>

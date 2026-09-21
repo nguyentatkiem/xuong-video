@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300" role="img"><defs><linearGradient id="n" gradientTransform="rotate(160)">
+  <stop offset="0%" stop-color="#0b3f96"/><stop offset="100%" stop-color="#4a90f0"/></linearGradient><pattern id="l" width="20" height="20" patternUnits="userSpaceOnUse">
+  <path d="M20 0H0V20" fill="none" stroke="#ffffff22" stroke-width="1"/></pattern></defs>
+  <rect width="300" height="300" fill="url(#n)"/><rect width="300" height="300" fill="url(#l)"/>
+  <g fill="#ffffff55"><path d="M60 210h180v12H60z"/><path d="M96 210V150l54-40 54 40v60z"/><path d="M132 210v-34h36v34z" fill="#ffffff88"/></g>
+  <text x="150" y="268" fill="#fff" opacity="0.9" font-family="'Be Vietnam Pro',system-ui,sans-serif" font-size="22" font-weight="700" text-anchor="middle">HÀ NỘI</text></svg>

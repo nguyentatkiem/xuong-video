@@ -1,0 +1,212 @@
+{
+  "slug": "",
+  "tep": "index.html",
+  "tieuDe": "Nguyễn Tất Kiểm — Thiết lập công ty 1 người trong kỷ nguyên AI",
+  "moTa": "Từ một CEO làm tất cả đến một hệ thống AI vận hành marketing, sales, content và chăm sóc khách hàng cho bạn. Khóa học SOLO AI CEO cùng Nguyễn Tất Kiểm.",
+  "tuKhoa": ["công ty 1 người", "SOLO AI CEO", "đào tạo AI cho doanh nghiệp", "AI Agent", "Nguyễn Tất Kiểm"],
+  "uuTien": "1.0",
+  "khoi": [
+    {
+      "loai": "hero",
+      "nhan": "Làm chủ AI. Làm chủ tương lai.",
+      "tieuDe": "Thiết lập công ty 1 người",
+      "tieuDeNhan": "trong kỷ nguyên AI",
+      "moTa": "Từ một CEO làm tất cả đến một hệ thống AI vận hành marketing, sales, content và chăm sóc khách hàng cho bạn.",
+      "nut": [
+        { "ten": "Khám phá SOLO AI CEO", "lien": "#khoa-hoc-chinh", "kieu": "chinh" },
+        { "ten": "Xem video giới thiệu", "lien": "#cam-nhan", "kieu": "phu", "bieuTuong": "play" }
+      ],
+      "trichDan": "Công nghệ không thay thế con người, nó khuếch đại những người biết sử dụng nó.",
+      "kyTen": "Nguyễn Tất Kiểm",
+      "anh": "/tai-nguyen/anh/chan-dung-hero.svg",
+      "anhChu": "Nguyễn Tất Kiểm — Business Strategist, AI Educator, Founder SOLO AI CEO",
+      "vietTay": "Một người\nVạn khả năng",
+      "heSinhThai": {
+        "ten": "Hệ sinh thái toàn diện",
+        "muc": [
+          { "ten": "AI Agent", "moTa": "Tư động hóa", "bieuTuong": "agent" },
+          { "ten": "Automations", "moTa": "Tăng hiệu suất", "bieuTuong": "auto" },
+          { "ten": "Content", "moTa": "Tạo nội dung", "bieuTuong": "content" },
+          { "ten": "Sales", "moTa": "Tăng doanh thu", "bieuTuong": "sales" },
+          { "ten": "Analytics", "moTa": "Đo lường & tối ưu", "bieuTuong": "analytics" },
+          { "ten": "Growth", "moTa": "Phát triển bền vững", "bieuTuong": "growth" }
+        ],
+        "ketLuan": "Doanh nghiệp hiện đại bắt đầu từ 1 người, với AI."
+      }
+    },
+    {
+      "loai": "thongSo",
+      "muc": [
+        { "so": "320.000+", "ten": "Học viên tin tưởng", "bieuTuong": "nguoi" },
+        { "so": "16+", "ten": "Năm kinh nghiệm", "bieuTuong": "huy-chuong" },
+        { "so": "350+", "ten": "Bài giảng", "bieuTuong": "micro" },
+        { "so": "300+", "ten": "Thương hiệu & doanh nghiệp", "bieuTuong": "toa-nha" },
+        { "so": "95%", "ten": "Học viên hài lòng", "bieuTuong": "tim" }
+      ]
+    },
+    {
+      "loai": "noiDau",
+      "id": "gioi-thieu",
+      "tieuDe": "Vì sao doanh nghiệp cũ đang quá nặng?",
+      "moTa": "Mô hình truyền thống khiến chủ doanh nghiệp luôn trong trạng thái quá tải và khó bứt phá.",
+      "the": [
+        { "ten": "Chi phí nhân sự tăng liên tục", "moTa": "Lương, đào tạo, quản lý… ngày càng tốn kém.", "bieuTuong": "chi-phi" },
+        { "ten": "CEO ôm quá nhiều việc", "moTa": "Từ chiến lược đến vận hành, không còn thời gian tăng trưởng.", "bieuTuong": "qua-tai" },
+        { "ten": "Marketing phụ thuộc con người", "moTa": "Hiệu quả không ổn định, khó scale.", "bieuTuong": "marketing" },
+        { "ten": "Tăng trưởng chậm và thiếu hệ thống", "moTa": "Mất nhiều thời gian, khó nhân bản.", "bieuTuong": "tang-truong" }
+      ],
+      "trichDan": "Không phải bạn cần nhiều hơn, mà là đúng cách hơn. Với AI, 1 người cũng có thể xây dựng doanh nghiệp lớn.",
+      "kyTen": "Nguyễn Tất Kiểm",
+      "anh": "/tai-nguyen/anh/chan-dung-trich-dan.svg",
+      "anhChu": "Nguyễn Tất Kiểm chia sẻ về mô hình công ty 1 người"
+    },
+    {
+      "loai": "soDo",
+      "tieuDe": "Tư duy setup công ty 1 người",
+      "moTa": "Mọi người hoàn toàn có thể sở hữu hệ thống riêng, tự vận hành và phát triển với các AI Agent và hệ thống tự động hóa, giúp bạn làm được nhiều hơn với ít nguồn lực hơn.",
+      "trichDan": "Bạn chỉ cần 1 người. Phần còn lại, hãy để AI làm.",
+      "trung": { "ten": "CEO", "anh": "/tai-nguyen/anh/chan-dung-so-do.svg" },
+      "trai": [
+        { "ten": "AI Marketing Agent", "moTa": "Tự động nội dung, quảng cáo, chăm sóc kênh", "bieuTuong": "marketing" },
+        { "ten": "AI Content Agent", "moTa": "Viết bài, làm video, thiết kế hình ảnh, tối ưu SEO", "bieuTuong": "content" }
+      ],
+      "phai": [
+        { "ten": "AI Sales Agent", "moTa": "Tư vấn, chăm sóc khách hàng, chốt đơn tự động", "bieuTuong": "sales" },
+        { "ten": "AI CSKH Agent", "moTa": "Hỗ trợ 24/7, giải đáp & nuôi dưỡng khách hàng", "bieuTuong": "cskh" }
+      ],
+      "duoi": [
+        { "ten": "AI Data Agent", "moTa": "Phân tích dữ liệu, báo cáo & gợi ý chiến lược", "bieuTuong": "analytics" }
+      ],
+      "congThuc": ["1 Người", "+ AI", "= Công ty lớn"]
+    },
+    {
+      "loai": "gioiThieu",
+      "id": "ve-toi",
+      "tieuDe": "Nguyễn Tất Kiểm là ai?",
+      "moTa": "Chuyên gia đào tạo, cố vấn doanh nghiệp và nhà truyền cảm hứng về ứng dụng AI cho doanh nghiệp Việt Nam. Đồng hành cùng 320.000+ học viên, giúp hàng ngàn chủ doanh nghiệp xây dựng hệ thống tăng trưởng bền vững với AI và xây dựng công ty 1 người.",
+      "anh": "/tai-nguyen/anh/chan-dung-gioi-thieu.svg",
+      "anhChu": "Nguyễn Tất Kiểm — nhà đào tạo và cố vấn doanh nghiệp",
+      "anhTrichDan": "Kiến tạo doanh nghiệp tinh gọn cho thế hệ doanh nhân mới.",
+      "the": [
+        { "ten": "Thực chiến & sát với thực tế", "moTa": "Chuyển giao kinh nghiệm từ 10+ năm kinh doanh thực tế.", "bieuTuong": "thuc-chien" },
+        { "ten": "Tư duy hệ thống", "moTa": "Xây dựng quy trình, mô hình ứng dụng AI vào doanh nghiệp.", "bieuTuong": "he-thong" },
+        { "ten": "Triển khai đến cùng", "moTa": "Cam kết đồng hành sau khóa học, hỗ trợ triển khai thực tế.", "bieuTuong": "trien-khai" }
+      ],
+      "trichDan": "Tôi luôn tin rằng: AI không thay thế con người, nhưng những người biết ứng dụng AI sẽ thay thế những người không biết.",
+      "kyTen": "Nguyễn Tất Kiểm"
+    },
+    {
+      "loai": "khoaHocChinh",
+      "id": "khoa-hoc-chinh",
+      "nhan": "Khóa học đặc biệt",
+      "tieuDe": "SOLO AI CEO",
+      "moTa": "Khóa học dành cho CEO muốn xây dựng 1 doanh nghiệp 1 người với AI.",
+      "tru": [
+        { "ten": "AI First Mindset", "moTa": "Tư duy đúng trong kỷ nguyên AI", "bieuTuong": "mindset" },
+        { "ten": "Thiết kế AI Workflow", "moTa": "Xây dựng quy trình tự động hóa hoàn chỉnh", "bieuTuong": "workflow" },
+        { "ten": "Xây AI Agent cho từng phòng ban", "moTa": "Triển khai AI cho marketing, sales, content, CSKH", "bieuTuong": "agent" },
+        { "ten": "Scale hệ thống tăng trưởng", "moTa": "Từ 1 người, xây doanh nghiệp bền vững", "bieuTuong": "scale" }
+      ],
+      "loiIch": {
+        "ten": "Bạn sẽ nhận được",
+        "muc": [
+          "Lộ trình học bài bản từ A–Z",
+          "Mẫu prompt + workflow thực chiến",
+          "Case study & công cụ đã được kiểm chứng",
+          "Hỗ trợ triển khai sau khóa học"
+        ],
+        "nut": { "ten": "Khám phá SOLO AI CEO", "lien": "/landing/solo-ai-ceo.html" }
+      },
+      "hop": {
+        "anh": "/tai-nguyen/anh/hop-solo-ai-ceo.svg",
+        "anhChu": "Bộ khóa học SOLO AI CEO — Xây công ty 1 người với AI"
+      }
+    },
+    {
+      "loai": "camNhan",
+      "id": "cam-nhan",
+      "tieuDe": "Feedback học viên / Câu chuyện thành công",
+      "moTa": "Hàng ngàn học viên đã ứng dụng AI để tạo ra kết quả thực tế. Đây là một số câu chuyện tiêu biểu.",
+      "nut": { "ten": "Xem thêm câu chuyện", "lien": "/blog/" },
+      "the": [
+        { "noiDung": "Sau khóa học, tôi đã tự xây được hệ thống marketing tự động, tiết kiệm 70% thời gian và doanh thu tăng gấp 3.", "ten": "Trần Minh Hoàng", "chucDanh": "Founder — Thương hiệu thời trang", "sao": 5, "anh": "/tai-nguyen/anh/hoc-vien-1.svg" },
+        { "noiDung": "Kiến thức rất thực tế, áp dụng ngay được. Tôi rời cả team AI làm việc 24/7 cho doanh nghiệp của mình.", "ten": "Nguyễn Thị Lan", "chucDanh": "CEO — Spa & Beauty", "sao": 5, "anh": "/tai-nguyen/anh/hoc-vien-2.svg" },
+        { "noiDung": "Từ 1 người làm tất cả, hiện tại có hệ thống AI vận hành ổn định, có thể giao cho gia đình và chính lược lớn hơn.", "ten": "Lê Quốc Huy", "chucDanh": "Founder — E-commerce", "sao": 5, "anh": "/tai-nguyen/anh/hoc-vien-3.svg" },
+        { "noiDung": "Khóa học thay đổi hoàn toàn tư duy của tôi. AI không khó như tôi nghĩ, quan trọng là có người chỉ đúng cách.", "ten": "Phạm Thu Hà", "chucDanh": "Freelancer — Content Creator", "sao": 5, "anh": "/tai-nguyen/anh/hoc-vien-4.svg" }
+      ],
+      "video": {
+        "ten": "Video cảm nhận học viên",
+        "chinh": { "ten": "Từ 1 người đến doanh thu gấp 3 lần", "thoiLuong": "08:24", "anh": "/tai-nguyen/anh/video-1.svg", "lien": "https://youtube.com/@nguyentatkiem" },
+        "phu": [
+          { "ten": "Tự động hóa 80% công việc", "thoiLuong": "06:15", "anh": "/tai-nguyen/anh/video-2.svg", "lien": "https://youtube.com/@nguyentatkiem" },
+          { "ten": "Cuộc sống tự do hơn nhờ AI", "thoiLuong": "05:48", "anh": "/tai-nguyen/anh/video-3.svg", "lien": "https://youtube.com/@nguyentatkiem" }
+        ]
+      }
+    },
+    {
+      "loai": "khoaHocKhac",
+      "id": "khoa-hoc",
+      "tieuDe": "Các khóa học nổi bật khác",
+      "moTa": "Hệ thống chương trình đào tạo giúp bạn làm chủ AI ở mọi khía cạnh trong kinh doanh và phát triển bản thân.",
+      "nut": { "ten": "Xem tất cả khóa học", "lien": "/#khoa-hoc" },
+      "the": [
+        { "ten": "AI Business Systems", "moTa": "Xây dựng hệ thống doanh nghiệp tự động với AI", "anh": "/tai-nguyen/anh/khoa-hoc-1.svg", "lien": "/landing/solo-ai-ceo.html" },
+        { "ten": "Brand Up", "moTa": "Xây dựng thương hiệu cá nhân & doanh nghiệp thời AI", "anh": "/tai-nguyen/anh/khoa-hoc-2.svg", "lien": "/landing/solo-ai-ceo.html" },
+        { "ten": "Ultimate Sales Systems", "moTa": "Hệ thống bán hàng tự động tăng doanh số bền vững", "anh": "/tai-nguyen/anh/khoa-hoc-3.svg", "lien": "/landing/solo-ai-ceo.html" },
+        { "ten": "AI Coaching", "moTa": "Ứng dụng AI trong coaching và đào tạo", "anh": "/tai-nguyen/anh/khoa-hoc-4.svg", "lien": "/landing/solo-ai-ceo.html" },
+        { "ten": "AI SuperBuilder", "moTa": "Xây dựng sản phẩm số và hệ thống kinh doanh với AI", "anh": "/tai-nguyen/anh/khoa-hoc-5.svg", "lien": "/landing/solo-ai-ceo.html" },
+        { "ten": "AI Personality Master", "moTa": "Làm chủ bản thân, tư duy và năng lực lãnh đạo thời AI", "anh": "/tai-nguyen/anh/khoa-hoc-6.svg", "lien": "/landing/solo-ai-ceo.html" }
+      ]
+    },
+    {
+      "loai": "suKien",
+      "id": "su-kien",
+      "tieuDe": "Lịch đào tạo / Sự kiện sắp diễn ra",
+      "moTa": "Tham gia các chương trình đào tạo trực tiếp để trải nghiệm, kết nối và được hướng dẫn trực tiếp bởi Nguyễn Tất Kiểm.",
+      "nut": { "ten": "Xem tất cả sự kiện", "lien": "/#su-kien" },
+      "the": [
+        { "ten": "AI Business System — HN", "ngay": "30,31/10 & 01/11/2026", "ngayIso": "2026-10-30", "diaDiem": "Hà Nội", "anh": "/tai-nguyen/anh/su-kien-1.svg", "nut": { "ten": "Đăng ký ngay", "lien": "/#lien-he" } },
+        { "ten": "Ultimate Sales Systems", "ngay": "26–27/09/2026", "ngayIso": "2026-09-26", "diaDiem": "Hà Nội", "anh": "/tai-nguyen/anh/su-kien-2.svg", "nut": { "ten": "Đăng ký ngay", "lien": "/#lien-he" } },
+        { "ten": "AI Business System — HCM", "ngay": "09–11/10/2026", "ngayIso": "2026-10-09", "diaDiem": "TP. Hồ Chí Minh", "anh": "/tai-nguyen/anh/su-kien-3.svg", "nut": { "ten": "Đăng ký ngay", "lien": "/#lien-he" } }
+      ]
+    },
+    {
+      "loai": "keuGoi",
+      "id": "lien-he",
+      "tieuDe": "Sẵn sàng xây công ty 1 người cùng AI?",
+      "moTa": "Bắt đầu với SOLO AI CEO để kiến tạo tự do, thu nhập và cuộc sống mà bạn mong muốn.",
+      "anh": "/tai-nguyen/anh/chan-dung-cta.svg",
+      "nut": [
+        { "ten": "Đăng ký tư vấn", "lien": "#form-tu-van", "kieu": "chinh" },
+        { "ten": "Nhận tài liệu miễn phí", "lien": "#form-tu-van", "kieu": "phu" }
+      ],
+      "loiIch": [
+        "Tư vấn 1:1 cùng đội ngũ",
+        "Giải đáp mọi thắc mắc",
+        "Gợi ý lộ trình phù hợp",
+        "Đồng hành sau khóa học"
+      ],
+      "vietTay": "Hành động hôm nay,\ncho một tương lai khác biệt!",
+      "kyTen": "Nguyễn Tất Kiểm"
+    },
+    {
+      "loai": "faq",
+      "id": "tai-nguyen",
+      "tieuDe": "FAQ - Câu hỏi thường gặp",
+      "moTa": "Giải đáp những thắc mắc phổ biến về khóa học và chương trình đào tạo.",
+      "muc": [
+        { "hoi": "SOLO AI CEO dành cho ai?", "dap": "Khóa học dành cho chủ doanh nghiệp, founder, freelancer và người làm tự do muốn dùng AI để vận hành marketing, sales, content và chăm sóc khách hàng mà không cần mở rộng nhân sự." },
+        { "hoi": "Sau khóa học tôi nhận được gì?", "dap": "Bạn nhận được lộ trình A–Z, bộ prompt và workflow thực chiến, case study đã kiểm chứng, cùng hỗ trợ triển khai sau khóa học để đưa hệ thống vào vận hành thật." },
+        { "hoi": "Tôi không giỏi công nghệ có học được không?", "dap": "Được. Chương trình đi từ tư duy nền tảng đến thao tác từng bước, có mẫu sẵn để bạn sao chép và chỉnh theo doanh nghiệp của mình. Không yêu cầu biết lập trình." },
+        { "hoi": "Có hỗ trợ triển khai thực tế không?", "dap": "Có. Sau khóa học bạn được vào cộng đồng học viên, tham gia các buổi hỏi đáp định kỳ và nhận hỗ trợ khi dựng AI Agent cho doanh nghiệp của mình." },
+        { "hoi": "Khóa học online hay offline?", "dap": "Có cả hai hình thức. Phần nền tảng học online theo tiến độ của bạn, phần thực chiến diễn ra trong các buổi offline tại Hà Nội và TP. Hồ Chí Minh theo lịch sự kiện." },
+        { "hoi": "Làm sao để đăng ký tư vấn?", "dap": "Bạn điền form đăng ký tư vấn trên trang này hoặc gọi hotline. Đội ngũ sẽ liên hệ trong vòng 24 giờ làm việc để tư vấn lộ trình phù hợp." }
+      ],
+      "hoTro": {
+        "ten": "Cần tư vấn thêm?",
+        "moTa": "Đội ngũ của chúng tôi luôn sẵn sàng hỗ trợ bạn lựa chọn chương trình phù hợp nhất.",
+        "nut": { "ten": "Nhận tư vấn 1:1", "lien": "#form-tu-van" }
+      }
+    }
+  ]
+}

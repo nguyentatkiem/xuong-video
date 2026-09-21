@@ -1,0 +1,13 @@
+# robots.txt — Nguyễn Tất Kiểm
+User-agent: *
+Allow: /
+
+# Trợ lý AI được phép đọc nội dung công khai
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://nguyentatkiem.com/sitemap.xml

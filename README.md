@@ -112,3 +112,24 @@ Dữ liệu mỗi lần dựng nằm ở `du-lieu/viec/<id>/` (video gốc, các
 Style có `"remotion": true` (keynote, clean-tech, fast-paced, review×2) được đạo diễn chèn tối đa 3 **màn motion cao cấp** render bằng Remotion (React + spring animation, webm nền trong suốt phủ lên video): `intro` thương hiệu, `scorecard` chấm điểm, `sosanh` bảng so sánh, `outro` kêu gọi. Composition trong `remotion/comps/` — thêm màn mới = thêm 1 tệp TSX + đăng ký trong `Root.tsx`.
 
 > **Giấy phép Remotion**: miễn phí cho cá nhân và tổ chức ≤3 người (trường hợp hiện tại). Nếu sau này Xưởng Video vận hành cho tổ chức lớn hơn, cần license "Remotion for Automators" ($0.01/render, tối thiểu $100/tháng) — xem remotion.dev/docs/license. Muốn né hẳn thì tắt `remotion` trong style, mọi tính năng khác không phụ thuộc.
+
+---
+
+## 🕸️ Xưởng Web — website + landing page + SEO AI tự động
+
+Repo này còn chứa một hệ thống riêng, độc lập với phần dựng video:
+
+| Thư mục | Vai trò |
+|---|---|
+| `trang-web/` | Website Nguyễn Tất Kiểm (HTML tĩnh sinh ra từ JSON) — xem `trang-web/DOC-TOI.md` |
+| `xuong-web/` | Bộ quản lý web: dựng trang, tạo landing page, soát SEO, viết bài bằng AI — xem `xuong-web/DOC-TOI.md` |
+
+```bash
+pnpm web          # dựng toàn bộ site ra trang-web/
+pnpm web:dev      # http://localhost:5680 + bảng điều khiển /bang-dieu-khien
+pnpm web:seo      # chấm điểm SEO từng trang, xuất báo cáo du-lieu/seo/
+pnpm web:tu-dong  # vòng tự động: dựng → soát → sửa meta yếu → viết bài mới
+```
+
+Không cần cài thêm thư viện nào (chỉ Node 20+). Phần AI dùng `claude` CLI như bộ dựng video;
+máy không có `claude` thì các lệnh dựng/soát/sitemap vẫn chạy đủ.

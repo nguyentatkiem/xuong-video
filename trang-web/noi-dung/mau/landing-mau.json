@@ -1,0 +1,94 @@
+{
+  "slug": "{{slug}}",
+  "tep": "landing/{{slug}}.html",
+  "tieuDe": "{{tieuDe}}",
+  "moTa": "{{moTa}}",
+  "tuKhoa": ["{{tuKhoa1}}", "{{tuKhoa2}}", "{{tuKhoa3}}"],
+  "uuTien": "0.9",
+  "khoi": [
+    {
+      "loai": "hero",
+      "nhan": "{{nhan}}",
+      "tieuDe": "{{heroTieuDe}}",
+      "tieuDeNhan": "{{heroTieuDeNhan}}",
+      "moTa": "{{heroMoTa}}",
+      "nut": [
+        { "ten": "Đăng ký tư vấn", "lien": "#form-tu-van", "kieu": "chinh" },
+        { "ten": "Xem lộ trình", "lien": "#lo-trinh", "kieu": "phu" }
+      ],
+      "trichDan": "{{trichDan}}",
+      "kyTen": "Nguyễn Tất Kiểm",
+      "anh": "/tai-nguyen/anh/chan-dung-hero.svg",
+      "anhChu": "Nguyễn Tất Kiểm",
+      "vietTay": "Một người\nVạn khả năng",
+      "heSinhThai": {
+        "ten": "Bạn sẽ dựng được",
+        "muc": [
+          { "ten": "{{ketQua1}}", "moTa": "{{ketQua1MoTa}}", "bieuTuong": "agent" },
+          { "ten": "{{ketQua2}}", "moTa": "{{ketQua2MoTa}}", "bieuTuong": "marketing" },
+          { "ten": "{{ketQua3}}", "moTa": "{{ketQua3MoTa}}", "bieuTuong": "sales" },
+          { "ten": "{{ketQua4}}", "moTa": "{{ketQua4MoTa}}", "bieuTuong": "content" },
+          { "ten": "{{ketQua5}}", "moTa": "{{ketQua5MoTa}}", "bieuTuong": "analytics" },
+          { "ten": "{{ketQua6}}", "moTa": "{{ketQua6MoTa}}", "bieuTuong": "auto" }
+        ],
+        "ketLuan": "{{ketLuan}}"
+      }
+    },
+    {
+      "loai": "noiDau",
+      "tieuDe": "{{noiDauTieuDe}}",
+      "moTa": "{{noiDauMoTa}}",
+      "the": [
+        { "ten": "{{noiDau1}}", "moTa": "{{noiDau1MoTa}}", "bieuTuong": "qua-tai" },
+        { "ten": "{{noiDau2}}", "moTa": "{{noiDau2MoTa}}", "bieuTuong": "chi-phi" },
+        { "ten": "{{noiDau3}}", "moTa": "{{noiDau3MoTa}}", "bieuTuong": "marketing" },
+        { "ten": "{{noiDau4}}", "moTa": "{{noiDau4MoTa}}", "bieuTuong": "tang-truong" }
+      ],
+      "trichDan": "{{noiDauTrichDan}}",
+      "kyTen": "Nguyễn Tất Kiểm",
+      "anh": "/tai-nguyen/anh/chan-dung-trich-dan.svg",
+      "anhChu": "Nguyễn Tất Kiểm"
+    },
+    {
+      "loai": "loTrinh",
+      "id": "lo-trinh",
+      "tieuDe": "{{loTrinhTieuDe}}",
+      "moTa": "{{loTrinhMoTa}}",
+      "buoc": [
+        { "ten": "{{buoc1}}", "moTa": "{{buoc1MoTa}}" },
+        { "ten": "{{buoc2}}", "moTa": "{{buoc2MoTa}}" },
+        { "ten": "{{buoc3}}", "moTa": "{{buoc3MoTa}}" },
+        { "ten": "{{buoc4}}", "moTa": "{{buoc4MoTa}}" }
+      ]
+    },
+    {
+      "loai": "faq",
+      "tieuDe": "Câu hỏi trước khi đăng ký",
+      "moTa": "{{faqMoTa}}",
+      "muc": [
+        { "hoi": "{{hoi1}}", "dap": "{{dap1}}" },
+        { "hoi": "{{hoi2}}", "dap": "{{dap2}}" },
+        { "hoi": "{{hoi3}}", "dap": "{{dap3}}" },
+        { "hoi": "{{hoi4}}", "dap": "{{dap4}}" }
+      ],
+      "hoTro": {
+        "ten": "Cần tư vấn thêm?",
+        "moTa": "Đội ngũ sẵn sàng giúp bạn chọn lộ trình phù hợp.",
+        "nut": { "ten": "Nhận tư vấn 1:1", "lien": "#form-tu-van" }
+      }
+    },
+    {
+      "loai": "keuGoi",
+      "tieuDe": "{{ctaTieuDe}}",
+      "moTa": "{{ctaMoTa}}",
+      "anh": "/tai-nguyen/anh/chan-dung-cta.svg",
+      "nut": [
+        { "ten": "Đăng ký tư vấn", "lien": "#form-tu-van", "kieu": "chinh" },
+        { "ten": "Nhận tài liệu miễn phí", "lien": "#form-tu-van", "kieu": "phu" }
+      ],
+      "loiIch": ["{{loiIch1}}", "{{loiIch2}}", "{{loiIch3}}", "{{loiIch4}}"],
+      "vietTay": "Hành động hôm nay,\ncho một tương lai khác biệt!",
+      "kyTen": "Nguyễn Tất Kiểm"
+    }
+  ]
+}
